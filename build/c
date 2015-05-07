@@ -1,0 +1,32 @@
+mkdir -p obj/
+cd obj/
+
+g++ -c -O3 \
+        ../../src/main.cpp       \
+        ../../src/grid.cpp       \
+        ../../src/terrarium.cpp  \
+        ../../src/liver.cpp      \
+        ../../src/mover.cpp      \
+        ../../src/feeler.cpp     \
+        ../../src/eater.cpp      \
+        ../../src/spawner.cpp    \
+        ../../src/dumbbug.cpp    \
+        ../../src/smallplant.cpp \
+\
+-std=c++11 
+
+g++ \
+        main.o       \
+        grid.o       \
+        terrarium.o  \
+        liver.o      \
+        mover.o      \
+        feeler.o     \
+        eater.o      \
+        spawner.o    \
+        dumbbug.o    \
+        smallplant.o \
+\
+-lncurses -o ../life
+
+cd ../
