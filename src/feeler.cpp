@@ -2,33 +2,36 @@
 
 void Feeler::feelSurroundings(const DirVecMap& dirs)
 {
-    _surroundings.clear();
+    _feelable.clear();
     forEachDir(dirs, [&](Direction dir){
         char posSym = home()->grid.charAt(pos() + dirs.at(dir));
-        _surroundings.insert(CharDirPair(posSym, dir));
+        _feelable.insert(CharDirPair(posSym, dir));
     });
 }
 
-int Feeler::numberOfSurrounding(Vec2 pos, const DirVecMap& dirs, char condition)
+int Feeler::numberOfSurrounding(Vec2 pos, const DirVecMap& dirs, const CharArr& conditions)
 {
     int things = 0;
     forEachDir(dirs, [&](Direction dir){
-        if (home()->grid.charAt(pos + dirs.at(dir)) == condition)
-            ++things;
+        for (int i = 0; i < conditions.size(); i++)
+        {
+            if (home()->grid.charAt(pos + dirs.at(dir)) == conditions.at(i))
+                ++things;
+        }
     });
     return things;
 }
 
-int Feeler::numberOfSurrounding(const DirVecMap& dirs, char condition)
+int Feeler::numberOfSurrounding(const DirVecMap& dirs, const CharArr& conditions)
 {
-    return numberOfSurrounding(pos(), dirs, condition);
+    return numberOfSurrounding(pos(), dirs, conditions);
 }
 
 bool Feeler::surroundingsContain(const DirVecMap& dirs, const CharArr& conditions)
 {
     for (int i = 0; i < conditions.size(); i++)
     {
-        if (numberOfSurrounding(dirs, conditions[i]) != 0)
+        if (numberOfSurrounding(dirs, conditions) != 0)
             return true;
     }
     return false;

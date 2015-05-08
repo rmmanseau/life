@@ -1,8 +1,8 @@
 #include "../headers/spawner.h"
 
 Spawner::Spawner(CharArr canSpawnOn, int energyAfterSpawn)
-    : _canSpawnOn(canSpawnOn)
-    , _energyAfterSpawn(energyAfterSpawn)
+    : _energyAfterSpawn(energyAfterSpawn)
+    , _canSpawnOn(canSpawnOn)
 {}
 
 void Spawner::spawn(const DirVecMap& dirs, Direction dir, VecArr& newBirths)

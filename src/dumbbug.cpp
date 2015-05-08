@@ -7,7 +7,7 @@ struct C
         static const int energyInitBase = 100;      // 100
         static const int energyInitVar  = 50;       // 50
         static const int energyFull = 300;          // 300
-        static const int energyAfterSpawn = 100;    // 100
+        static const int energyAfterSpawn = 10;     // 100
         static const int energyFromEating = 30;     // 30
         static const int energyToSpawn = 300;       // 300
 
@@ -18,7 +18,7 @@ struct C
     {
         static const int energyInitBase = 1;    // 1
         static const int energyAfterSpawn = 0;  // 0
-        static const int energyToHatch = 100;   // 100
+        static const int energyToHatch = 50;   // 100
     };
 };
 
@@ -32,7 +32,6 @@ DumbBug::DumbBug(Terrarium& home, Vec2 pos)
 void DumbBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
 {
     --_energy;
-    feelSurroundings(directions);
     
     // Die
     if (_energy <= 0 || _home->grid.charAt(_pos) == Sym::empty)
@@ -40,15 +39,16 @@ void DumbBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap&
         die(ID, newDeaths);
     }
     // Spawn
-    if (_energy >= C::Bug::energyToSpawn)
+    else if (_energy >= C::Bug::energyToSpawn)
     {
-        Direction spawnDir = randomElementOfIndex(_canSpawnOn, _surroundings);
+        Direction spawnDir = randomElementOfIndex(_canSpawnOn, _feelable);
         spawn(directions, spawnDir, newBirths);
     }
     // Eat
     else if (surroundingsContain(directions, _canEat) && _energy <= C::Bug::energyFull)
     {
-        Direction foodDir = randomElementOfIndex(_canEat, _surroundings);
+        feelSurroundings(directions);
+        Direction foodDir = randomElementOfIndex(_canEat, _feelable);
         eat(directions, foodDir);
     }
     // Move
@@ -80,7 +80,7 @@ void DumbBugEgg::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecM
     else if (_energy >= C::Egg::energyToHatch)
     {
         spawn(newBirths);
-        newDeaths.push_back(ID);
+        die(ID, newDeaths);
     }
 
 }

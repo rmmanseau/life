@@ -16,7 +16,7 @@ T2 randomElement(const std::map<T1, T2>& container)
 
 template <typename T1, typename T2>
 T2 randomElement(const std::multimap<T1, T2>& container)
-{
+{    
     auto it = container.begin();
     int randIndex = rand() % container.size();
     std::advance(it, randIndex);
@@ -25,10 +25,24 @@ T2 randomElement(const std::multimap<T1, T2>& container)
 
 template <typename T>
 T randomElement(const std::vector<T>& container)
-{
-    auto it = container.begin();
+{ 
     int randIndex = rand() % container.size();
     return container[randIndex];
+}
+
+
+template <typename T1, typename T2>
+T2 randomElementOfIndex(T1 index, const std::multimap<T1, T2>& container)
+{
+    auto its = container.equal_range(index);
+    int size = std::distance(its.first, its.second);
+    int randIndex;
+    if (size > 0)
+        randIndex = std::rand() % size;
+    else
+        randIndex = 0;
+    std::advance(its.first, randIndex);
+    return its.first->second;
 }
 
 template <typename T1, typename T2>
@@ -36,26 +50,22 @@ T2 randomElementOfIndex(std::vector<T1> indices, const std::multimap<T1, T2>& co
 {
     T1 index = randomElement(indices);
 
-    auto its = container.equal_range(index);
-    auto size = std::distance(its.first, its.second);
-    auto randIndex = std::rand() % size;
-    std::advance(its.first, randIndex);
-    return its.first->second;
-}
-
-template <typename T1, typename T2>
-T2 randomElementOfIndex(T1 index, const std::multimap<T1, T2>& container)
-{
-    auto its = container.equal_range(index);
-    auto size = std::distance(its.first, its.second);
-    auto randIndex = std::rand() % size;
-    std::advance(its.first, randIndex);
-    return its.first->second;
+    return randomElementOfIndex(index, container);
 }
 
 inline Direction randomDirection()
 {
     return (Direction)(rand() % 8);
+}
+
+template <typename T>
+bool containerContains(std::vector<T> conditions, T test)
+{
+    for (int i = 0; i < conditions.size(); i++) {
+        if (conditions.at(i) == test)
+            return true;
+    }
+    return false;
 }
 
 #endif // HELPERS_H

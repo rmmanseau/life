@@ -1,8 +1,8 @@
 #include "../headers/eater.h"
 
 Eater::Eater(CharArr canEat, int energyFromFood)
-    : _canEat(canEat)
-    , _energyFromFood(energyFromFood)
+    : _energyFromFood(energyFromFood)
+    , _canEat(canEat)
 {}
 
 void Eater::eat(const DirVecMap& dirs, Direction dir)

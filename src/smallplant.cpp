@@ -1,4 +1,6 @@
 #include "../headers/smallplant.h"
+#include <ncurses.h>
+
 
 struct C
 {
@@ -17,7 +19,7 @@ SmallPlant::SmallPlant(Terrarium& home, Vec2 pos)
 
 void SmallPlant::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
 {
-    int surroundingSmallPlants = numberOfSurrounding(directions, Sym::smallPlant);
+    int surroundingSmallPlants = numberOfSurrounding(directions, {Sym::smallPlant});
     if (surroundingSmallPlants == C::neighborsToSkipAct)
         return;
 
@@ -38,9 +40,9 @@ void SmallPlant::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecM
     }
     else if (_energy >= C::energyToGrow)
     {
-        Direction newDir = (Direction)(rand() % directions.size());
+        Direction newDir = randomDirection();
         Vec2 newPos = _pos + directions.at(newDir);
-        if (numberOfSurrounding(newPos, directions, Sym::smallPlant) <= C::neighborsToBlockGrow)
+        if (numberOfSurrounding(newPos, directions, {Sym::smallPlant}) <= C::neighborsToBlockGrow)
             spawn(directions, newDir, newBirths);
     }
 }

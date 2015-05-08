@@ -1,0 +1,7 @@
+cd ~/Copy/cs/c++/_qt/life
+
+rm *.h
+rm *.cpp
+
+cp ~/CS/c++/life/src/* .
+cp ~/CS/c++/life/headers/* .
