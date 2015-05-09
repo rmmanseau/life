@@ -6,19 +6,19 @@ struct C
     {
         static const int energyInitBase = 100;      // 100
         static const int energyInitVar  = 50;       // 50
-        static const int energyFull = 300;          // 300
-        static const int energyAfterSpawn = 10;     // 100
-        static const int energyFromEating = 30;     // 30
-        static const int energyToSpawn = 300;       // 300
+        static const int energyFull = 350;          // 300
+        static const int energyAfterSpawn = 50;     // 100
+        static const int energyFromEating = 20;     // 30
+        static const int energyToSpawn = 350;       // 300
 
-        static const int sluggishness = 2;          // 2
+        static const int sluggishness = 3;          // 2
     };
 
     struct Egg
     {
         static const int energyInitBase = 1;    // 1
         static const int energyAfterSpawn = 0;  // 0
-        static const int energyToHatch = 50;   // 100
+        static const int energyToHatch = 100;   // 100
     };
 };
 

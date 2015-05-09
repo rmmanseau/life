@@ -1,5 +1,8 @@
 #include "../headers/worlddrawer.h"
 
+#define _DEFAULT_WHITE 98
+#define _DEFAULT_BLACK 99
+
 #define _COLOR_BROWN 100
 #define _COLOR_DUMB_GRAY 101
 #define _COLOR_LIGHT_ROCK 102
@@ -14,6 +17,7 @@
 #define _COLOR_VIOLET 111
 
 namespace Color {
+    const int termColor = 99;
     const int lightRock = 100;
     const int midRock = 101;
     const int darkRock = 102;
@@ -30,6 +34,11 @@ namespace Color {
 
 void createMapColors()
 {
+    init_color(_DEFAULT_WHITE, 1000, 1000, 1000);
+    init_color(_DEFAULT_BLACK, 0, 0, 0);
+
+    init_pair(Color::termColor, _DEFAULT_WHITE, _DEFAULT_BLACK);
+
     init_color(_COLOR_BROWN, 190, 100, 30);
     init_color(_COLOR_DUMB_GRAY, 850, 840, 820);
     init_color(_COLOR_LIGHT_ROCK, 650, 630, 610);
@@ -70,68 +79,61 @@ WorldDrawer::WorldDrawer(const std::string& world, int worldX, int worldY)
 
     createMapColors();
 }
+void WorldDrawer::print(char sym, int color, int offX, int offY)
+{
+    if (_changes.count(sym) == 0)
+        return;
 
-void WorldDrawer::draw() {
-    struct Local
+    attron(COLOR_PAIR(color));
+
+    auto its = _changes.equal_range(sym);
+    while(its.first != its.second)
     {
-        static void singleColorPrint(char sym, int color, const CharVecMap& changes)
-        {
-            if (changes.count(sym) == 0)
-                return;
+        int x = its.first->second.x;
+        int y = its.first->second.y;
+        mvprintw(y + offY, x + offX, "%c", sym);
 
-            attron(COLOR_PAIR(color));
+        ++its.first;
+    }
 
-            auto its = changes.equal_range(sym);
-            while(its.first != its.second)
-            {
-                int x = its.first->second.x;
-                int y = its.first->second.y;
-                mvprintw(y, x, "%c", sym);
+    attroff(COLOR_PAIR(color));
+}
 
-                ++its.first;
-            }
+void WorldDrawer::print(char sym, IntArr colors, int chance, int offX, int offY)
+{
+    if (_changes.count(sym) == 0)
+        return;
 
-            attroff(COLOR_PAIR(color));
-        }
+    auto its = _changes.equal_range(sym);
+    while (its.first != its.second)
+    {
+        int color;
+        if (rand() % chance == 0)
+            color = colors.at((rand() % colors.size()-1) + 1);
+        else
+            color = colors.at(0);
 
-        static void multiColorPrint(char sym, IntArr colors, const CharVecMap& changes, int chance)
-        {
-            if (changes.count(sym) == 0)
-                return;
+        int x = its.first->second.x;
+        int y = its.first->second.y;
+        
+        attron(COLOR_PAIR(color));
+        mvprintw(y + offY, x + offX, "%c", sym);
+        attroff(COLOR_PAIR(color));
 
-            auto its = changes.equal_range(sym);
-            while (its.first != its.second)
-            {
-                int color;
-                if (rand() % chance == 0)
-                    color = colors.at((rand() % colors.size()-1) + 1);
-                else
-                    color = colors.at(0);
+        ++its.first;
+    }
+}
 
-                int x = its.first->second.x;
-                int y = its.first->second.y;
-                
-                attron(COLOR_PAIR(color));
-                mvprintw(y, x, "%c", sym);
-                attroff(COLOR_PAIR(color));
+void WorldDrawer::draw(int offX, int offY) {
 
-                ++its.first;
-            }
-        }
-    };
-
-    // start_color();
-
-    Local::singleColorPrint(Sym::empty, Color::empty, _changes);
-    Local::multiColorPrint(Sym::rock, {Color::midRock, Color::lightRock, Color::darkRock}, _changes, 2);
-    Local::multiColorPrint(Sym::smallPlant, {Color::grass, Color::redRose, Color::yellowTulip, Color::violet}, _changes, 30);
-    Local::singleColorPrint(Sym::dumbBug, Color::dumbBug, _changes);
-    Local::singleColorPrint(Sym::dumbBugEgg, Color::egg, _changes);
-    Local::singleColorPrint(Sym::mSmartBug, Color::smartBug, _changes);
-    Local::singleColorPrint(Sym::fSmartBug, Color::smartBug, _changes);
-    Local::singleColorPrint(Sym::smartBugEgg, Color::egg, _changes);
+    print(Sym::empty, Color::empty, offX, offY);
+    print(Sym::rock, {Color::midRock, Color::lightRock, Color::darkRock}, 2, offX, offY);
+    print(Sym::smallPlant, {Color::grass, Color::redRose, Color::yellowTulip, Color::violet}, 30, offX, offY);
+    print(Sym::dumbBug, Color::dumbBug, offX, offY);
+    print(Sym::dumbBugEgg, Color::egg, offX, offY);
+    print(Sym::mSmartBug, Color::smartBug, offX, offY);
+    print(Sym::fSmartBug, Color::smartBug, offX, offY);
+    print(Sym::smartBugEgg, Color::egg, offX, offY);
 
     _changes.clear();
-
-    // end_color();
 }

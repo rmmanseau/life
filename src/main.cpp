@@ -10,24 +10,32 @@
 #include "../headers/worlds.h"
 #include "../headers/terrarium.h"
 #include "../headers/worlddrawer.h"
+#include "../headers/statdrawer.h"
 #include "../headers/dumbbug.h"
 #include "../headers/smartbug.h"
 #include "../headers/smallplant.h"
 
 ///=== Settings ================================================================
 #define SIMPLEMODE false
+
 float msFrameSpeed = 0.1;
 std::string map = World::test;
+
+int winOffX = 4;
+int winOffY = 2;
+int statOffX = 2;
+int statOffY = 0;
 ///=============================================================================
 
 template <typename T, typename U>
-void letAct(Terrarium& t, const DirVecMap& directions, std::vector<T>& lifeForms, std::vector<U>& newBirths)
+int letAct(Terrarium& t, const DirVecMap& directions, std::vector<T>& lifeForms, std::vector<U>& newBirths)
 {
     if (lifeForms.size() == 0)
-        return;
+        return 0;
 
     VecArr birthVec;
     IntArr deathVec;
+    int newBirthAmount;
 
     for (int i = 0; i < lifeForms.size(); ++i)
     {
@@ -41,6 +49,8 @@ void letAct(Terrarium& t, const DirVecMap& directions, std::vector<T>& lifeForms
         lifeForms.erase(lifeForms.begin() + ID);
     }
 
+    newBirthAmount = birthVec.size();
+
     while (!birthVec.empty())
     {
         Vec2 birthPlace = birthVec.back();
@@ -49,12 +59,14 @@ void letAct(Terrarium& t, const DirVecMap& directions, std::vector<T>& lifeForms
         t.grid.addChar(birthPlace, newBorn.sym());
         newBirths.push_back(newBorn);
     }
+
+    return newBirthAmount;
 }
 
 template <typename T>
-void letAct(Terrarium& t, const DirVecMap& directions, std::vector<T>& lifeForms)
+int letAct(Terrarium& t, const DirVecMap& directions, std::vector<T>& lifeForms)
 {
-    letAct(t, directions, lifeForms, lifeForms);
+    return letAct(t, directions, lifeForms, lifeForms);
 }
 
 int main(int argc, char* argv[])
@@ -113,7 +125,12 @@ int main(int argc, char* argv[])
         start_color();
         WorldDrawer picasso(map, t.grid.x, t.grid.y);
         t.grid.assignDrawer(picasso);
-        picasso.draw();
+        picasso.draw(winOffX, winOffY);
+
+        StatDrawer tukey;
+        Stats stats;
+        statOffX += winOffX + t.grid.x;
+        statOffY += winOffY;
     #endif
 
     std::vector<DumbBug> dumbBugs;
@@ -155,6 +172,10 @@ int main(int argc, char* argv[])
             }
         }
     }
+
+    stats.totalDumbBugs = dumbBugs.size();
+    stats.totalSmartBugs = smartBugs.size();
+    stats.totalSmallPlants = smallPlants.size();
 
     clock_t cycleTime;
     float longestCycle = 0;
@@ -206,7 +227,6 @@ int main(int argc, char* argv[])
 
         if (paused)
         {
-            mvprintw(t.grid.y + 1, 5, "Min Frame Speed: %f      ", msFrameSpeed);
             napms(100);
         }
         else
@@ -216,32 +236,51 @@ int main(int argc, char* argv[])
                 SIM LOOP
 ==============================================================================*/
 
-            letAct(t, directions, dumbBugs, dumbBugEggs);
-            letAct(t, directions, dumbBugEggs, dumbBugs);
-            letAct(t, directions, smallPlants);
-            letAct(t, directions, smartBugs, smartBugEggs);
-            letAct(t, directions, smartBugEggs, smartBugs);
+                                      letAct(t, directions, dumbBugs, dumbBugEggs);
+            stats.totalDumbBugs +=    letAct(t, directions, dumbBugEggs, dumbBugs);
+            stats.totalSmallPlants += letAct(t, directions, smallPlants);
+                                      letAct(t, directions, smartBugs, smartBugEggs);
+            stats.totalSmartBugs +=   letAct(t, directions, smartBugEggs, smartBugs);
 
             float msCycleTime = (float)((clock() - cycleTime)/100);
-
             float msDelay = msFrameSpeed - msCycleTime;
+
             if (msDelay > 0)
                 napms(msDelay);
 
             #if SIMPLEMODE
                 mvprintw(0, 0, "%s", t.grid.map.c_str());
             #else
-                picasso.draw();
+                picasso.draw(winOffX, winOffY);
             #endif
 
-            if ( totalCycles > 20 && longestCycle < msCycleTime)
+            if (totalCycles > 20 && longestCycle < msCycleTime)
                 longestCycle = msCycleTime;
 
-            mvprintw(t.grid.y, 5, "Delay: %f     Cycle: %f      ", msDelay, msCycleTime);
-            mvprintw(t.grid.y + 1, 5, "Min Frame Speed: %f      ", msFrameSpeed);
-            mvprintw(t.grid.y + 2, 5, "Longest Cycle: %f     ", longestCycle);
+            stats.msFrameSpeed = msFrameSpeed;
+            stats.msCycleSpeed = msCycleTime;
+            stats.msCycleDelay = msDelay;
+            stats.msLongestCycle = longestCycle;
 
+            stats.totalCycles = totalCycles;
+
+            stats.currentDumbBugs = dumbBugs.size();
+            stats.currentSmallPlants = smallPlants.size();
+            stats.currentSmartBugs = smartBugs.size();
+
+            stats.totalLife = stats.totalDumbBugs
+                              + stats.totalSmallPlants
+                              + stats.totalSmartBugs;
+            
+            stats.currentLife = dumbBugs.size()
+                                + smartBugs.size()
+                                + smallPlants.size();
+            
             ++totalCycles;
+            
+            #if !SIMPLEMODE
+                tukey.draw(stats, statOffX, statOffY);
+            #endif
         }
     }
     refresh();

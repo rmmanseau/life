@@ -29,10 +29,10 @@ typedef std::map<Direction, Vec2>       DirVecMap;
 enum Sym {
     rock        = '@',
     empty       = ' ',
-    dumbBug     = 'e',
+    dumbBug     = 'o',
     mSmartBug   = 'X',
     fSmartBug   = 'x',
-    dumbBugEgg  = 'o',
+    dumbBugEgg  = 'e',
     smartBugEgg = 'a',
     fShrew      = '&',
     mShrew      = '8',
