@@ -4,12 +4,12 @@ struct C
 {
     struct Grown
     {
-        static const int energyInitBase   = 60000; //600
+        static const int energyInitBase   = 600; //600
         static const int energyInitVar    = 100; //100
         static const int energyFull       = 800; //800
         static const int energyFromEating = 200; //200
         static const int energyToSpawn    = 700; //700
-        static const int energyAfterSpawn = 60000; //300
+        static const int energyAfterSpawn = 300; //300
 
         static const int whimsyInit          = 100; //100
         static const int whimsyFromEating    = 50;  //50

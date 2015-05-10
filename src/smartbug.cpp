@@ -4,10 +4,10 @@ struct C
 {
     struct Bug
     {
-        static const int energyInitBase   = 10000; //300
+        static const int energyInitBase   = 50; //300
         static const int energyInitVar    = 50; //300
         static const int energyToSpawn    = 400; //400
-        static const int energyAfterSpawn = 50000; //100
+        static const int energyAfterSpawn = 50; //100
         static const int energyFromEating = 20;  //20
         static const int energyFull       = 450; //450
 
