@@ -6,6 +6,7 @@
 
 #include "terrarium.h"
 #include "enums.h"
+#include "helpers.h"
 
 class Mover
 {
@@ -16,6 +17,7 @@ public:
     Mover(CharArr canWalkOn);
 
     virtual void move(const DirVecMap& dirs, Direction dir);
+    virtual bool canMoveTowards(const DirVecMap& dirs, Direction dir);
 
     virtual Terrarium* home() = 0;
     virtual Vec2 pos() = 0;

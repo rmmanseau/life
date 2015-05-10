@@ -30,13 +30,18 @@ enum Sym {
     rock        = '@',
     empty       = ' ',
     dumbBug     = 'o',
+    dumbBugEgg  = 'e',
     mSmartBug   = 'X',
     fSmartBug   = 'x',
-    dumbBugEgg  = 'e',
     smartBugEgg = 'a',
-    fShrew      = '&',
+    fShrew      = 'S',
     mShrew      = '8',
-    smallPlant  = ','
+    bShrew      = 's',
+    fFox        = 'Z',
+    mFox        = 'M',
+    bFox        = 'm',
+    smallPlant  = ',',
+    flower      = 'v'
 };
 
 #endif // ENUMS_H

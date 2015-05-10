@@ -24,6 +24,9 @@ struct Stats
 
     int currentSmallPlants = 0;
     int totalSmallPlants = 0;
+
+    int currentShrews = 0;
+    int totalShrews = 0;
 };
 
 class StatDrawer

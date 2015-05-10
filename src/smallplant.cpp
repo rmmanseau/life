@@ -4,7 +4,8 @@
 
 struct C
 {
-    static const int energyInit = 10;
+    static const int energyInitBase = 10;
+    static const int energyInitVar = 0;
     static const int energyToGrow = 50;
     static const int energyAfterGrow = 10;
 
@@ -13,7 +14,7 @@ struct C
 };
 
 SmallPlant::SmallPlant(Terrarium& home, Vec2 pos)
-    : Liver(home, pos, C::energyInit, Sym::smallPlant)
+    : Liver(home, pos, C::energyInitBase, C::energyInitVar, Sym::smallPlant)
     , Spawner({Sym::empty}, C::energyAfterGrow)
 {}
 

@@ -54,6 +54,11 @@ void StatDrawer::draw(const Stats& stats, int offX, int offY)
     mvprintw(offY + 17, offX + 1, " Current SmallPlants: ");
     mvprintw(offY + 16, offX + 24, " %i ", stats.totalSmallPlants);
     mvprintw(offY + 17, offX + 24, " %i ", stats.currentSmallPlants);
+
+    mvprintw(offY + 19, offX + 1, " Total Shrews:   "); 
+    mvprintw(offY + 20, offX + 1, " Current Shrews: ");
+    mvprintw(offY + 19, offX + 19, " %i ", stats.totalShrews);
+    mvprintw(offY + 20, offX + 19, " %i ", stats.currentShrews);
     
     attroff(COLOR_PAIR(Color::norm));
 }

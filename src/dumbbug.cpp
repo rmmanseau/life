@@ -17,13 +17,14 @@ struct C
     struct Egg
     {
         static const int energyInitBase = 1;    // 1
+        static const int energyInitVar = 20;    // 20
         static const int energyAfterSpawn = 0;  // 0
         static const int energyToHatch = 100;   // 100
     };
 };
 
 DumbBug::DumbBug(Terrarium& home, Vec2 pos)
-    : Liver(home, pos, C::Bug::energyInitBase, Sym::dumbBug)
+    : Liver(home, pos, C::Bug::energyInitBase, C::Bug::energyInitVar, Sym::dumbBug)
     , Mover({Sym::empty, Sym::smallPlant})
     , Eater({Sym::smallPlant}, C::Bug::energyFromEating)
     , Spawner({Sym::empty}, C::Bug::energyAfterSpawn)
@@ -64,7 +65,7 @@ void DumbBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap&
 
 
 DumbBugEgg::DumbBugEgg(Terrarium& home, Vec2 pos)
-    : Liver(home, pos, C::Egg::energyInitBase, Sym::dumbBugEgg)
+    : Liver(home, pos, C::Egg::energyInitBase, C::Egg::energyInitVar, Sym::dumbBugEgg)
     , Spawner({Sym::dumbBugEgg}, C::Egg::energyAfterSpawn)
 {}
 

@@ -15,6 +15,7 @@ g++ -c -O3 \
         ../../src/spawner.cpp     \
         ../../src/dumbbug.cpp     \
         ../../src/smartbug.cpp    \
+        ../../src/shrew.cpp       \
         ../../src/smallplant.cpp  \
 \
 -std=c++11 
@@ -33,6 +34,7 @@ g++ \
         spawner.o     \
         dumbbug.o     \
         smartbug.o    \
+        shrew.o       \
         smallplant.o  \
 \
 -lncurses -o ../life

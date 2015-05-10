@@ -4,9 +4,10 @@ struct C
 {
     struct Bug
     {
-        static const int energyInitBase   = 100; //300
+        static const int energyInitBase   = 10000; //300
+        static const int energyInitVar    = 50; //300
         static const int energyToSpawn    = 400; //400
-        static const int energyAfterSpawn = 50; //100
+        static const int energyAfterSpawn = 50000; //100
         static const int energyFromEating = 20;  //20
         static const int energyFull       = 450; //450
 
@@ -17,13 +18,14 @@ struct C
     struct Egg
     {
         static const int energyInitBase = 1;
+        static const int energyInitVar = 20;
         static const int energyAfterSpawn = 0;
         static const int energyToHatch = 100;
     };
 };
 
 SmartBug::SmartBug(Terrarium& home, Vec2 pos, char sym)
-    : Liver(home, pos, C::Bug::energyInitBase, sym)
+    : Liver(home, pos, C::Bug::energyInitBase, C::Bug::energyInitVar, sym)
     , Mover({Sym::empty, Sym::smallPlant})
     , Seer(C::Bug::sightDistance, {Sym::empty})
     , Eater({Sym::smallPlant}, C::Bug::energyFromEating)
@@ -31,7 +33,7 @@ SmartBug::SmartBug(Terrarium& home, Vec2 pos, char sym)
 {
     if (_sym == '#')
     {
-        rand() % 2 == 0 ? _sym = Sym::mSmartBug : _sym = Sym::fSmartBug;
+        rand() % 2 ? _sym = Sym::mSmartBug : _sym = Sym::fSmartBug;
     }
     _currentDir = randomDirection();
 }
@@ -46,7 +48,7 @@ void SmartBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap
         die(ID, newDeaths);
     }
     // Eat
-    if (_energy <= C::Bug::energyFull
+    else if (_energy <= C::Bug::energyFull
         && surroundingsContain(directions, _canEat))
     {
         feelSurroundings(directions);
@@ -83,7 +85,7 @@ void SmartBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap
             move(directions, _currentDir);
         }
         // Change Direction
-        else if (!containerContains(_canMoveOn, _home->grid.charAt(_pos + directions.at(_currentDir)))
+        else if (canMoveTowards(directions, _currentDir)
                  || (rand() % C::Bug::changeDirectionChance == 0))
         {
             _currentDir = randomDirection();
@@ -99,7 +101,7 @@ void SmartBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap
 
 
 SmartBugEgg::SmartBugEgg(Terrarium& home, Vec2 pos)
-    : Liver(home, pos, C::Egg::energyInitBase, Sym::smartBugEgg)
+    : Liver(home, pos, C::Egg::energyInitBase, C::Egg::energyInitVar, Sym::smartBugEgg)
     , Spawner({Sym::smartBugEgg}, C::Egg::energyAfterSpawn)
 {}
 

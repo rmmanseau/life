@@ -68,4 +68,20 @@ bool containerContains(std::vector<T> conditions, T test)
     return false;
 }
 
+inline Direction clockwiseOf(Direction dir)
+{
+    int newDir = (Direction)((int)dir + 1);
+    if (newDir > 7)
+        newDir = 0;
+    return (Direction)newDir;
+}
+
+inline Direction counterClockwiseOf(Direction dir)
+{
+    int newDir = (Direction)((int)dir - 1);
+    if (newDir < 0)
+        newDir = 7;
+    return (Direction)newDir;
+}
+
 #endif // HELPERS_H

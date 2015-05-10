@@ -13,6 +13,7 @@
 #include "../headers/statdrawer.h"
 #include "../headers/dumbbug.h"
 #include "../headers/smartbug.h"
+#include "../headers/shrew.h"
 #include "../headers/smallplant.h"
 
 ///=== Settings ================================================================
@@ -91,6 +92,8 @@ int main(int argc, char* argv[])
             map = World::seed;
         else if (mapName == "test")
             map = World::test;
+        else if (mapName == "test1")
+            map = World::test1;
         
         if (argc > 2)
         {
@@ -138,6 +141,7 @@ int main(int argc, char* argv[])
     std::vector<SmallPlant> smallPlants;
     std::vector<SmartBug> smartBugs;
     std::vector<SmartBugEgg> smartBugEggs;
+    std::vector<Shrew> shrews;
 
     for (int y = 0; y < t.grid.y; ++y) {
         for (int x = 0; x < t.grid.x; ++x) {
@@ -169,6 +173,14 @@ int main(int argc, char* argv[])
                 case Sym::smartBugEgg:
                     smartBugEggs.push_back(SmartBugEgg(t, pos));
                     break;
+
+                case Sym::mShrew:
+                    shrews.push_back(Shrew(t, pos, Sym::mShrew));
+                    break;
+
+                case Sym::fShrew:
+                    shrews.push_back(Shrew(t, pos, Sym::fShrew));
+                    break;
             }
         }
     }
@@ -176,6 +188,7 @@ int main(int argc, char* argv[])
     stats.totalDumbBugs = dumbBugs.size();
     stats.totalSmartBugs = smartBugs.size();
     stats.totalSmallPlants = smallPlants.size();
+    stats.totalShrews = shrews.size();
 
     clock_t cycleTime;
     float longestCycle = 0;
@@ -241,6 +254,7 @@ int main(int argc, char* argv[])
             stats.totalSmallPlants += letAct(t, directions, smallPlants);
                                       letAct(t, directions, smartBugs, smartBugEggs);
             stats.totalSmartBugs +=   letAct(t, directions, smartBugEggs, smartBugs);
+            stats.totalShrews +=      letAct(t, directions, shrews);
 
             float msCycleTime = (float)((clock() - cycleTime)/100);
             float msDelay = msFrameSpeed - msCycleTime;
@@ -267,14 +281,17 @@ int main(int argc, char* argv[])
             stats.currentDumbBugs = dumbBugs.size();
             stats.currentSmallPlants = smallPlants.size();
             stats.currentSmartBugs = smartBugs.size();
+            stats.currentShrews = shrews.size();
 
             stats.totalLife = stats.totalDumbBugs
                               + stats.totalSmallPlants
-                              + stats.totalSmartBugs;
+                              + stats.totalSmartBugs
+                              + stats.totalShrews;
             
             stats.currentLife = dumbBugs.size()
                                 + smartBugs.size()
-                                + smallPlants.size();
+                                + smallPlants.size()
+                                + shrews.size();
             
             ++totalCycles;
             

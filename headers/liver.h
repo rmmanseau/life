@@ -15,7 +15,7 @@ protected:
     char _sym;
 
 public:
-    Liver(Terrarium& home, Vec2 pos, int energy, char sym);
+    Liver(Terrarium& home, Vec2 pos, int energyBase, int energyVar, char sym);
 
     void die(int ID, IntArr& deaths);
 

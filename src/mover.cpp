@@ -13,3 +13,8 @@ void Mover::move(const DirVecMap& dirs, Direction dir)
         setPos(newPos);
     }
 }
+
+bool Mover::canMoveTowards(const DirVecMap& dirs, Direction dir)
+{
+    return !containerContains(_canMoveOn, home()->grid.charAt(pos() + dirs.at(dir)));
+}
