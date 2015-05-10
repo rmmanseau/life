@@ -34,11 +34,12 @@ namespace Color {
 
 void createMapColors()
 {
-    init_color(_COLOR_DIRT, 190, 100, 30);
+    init_color(_COLOR_DIRT, 120, 100, 80);
     init_color(_COLOR_LIGHT_ROCK, 650, 630, 610);
     init_color(_COLOR_MIDDLE_ROCK, 550, 530, 510);
     init_color(_COLOR_DARK_ROCK, 450, 435, 425);
-    init_color(_COLOR_GRASS, 462, 662, 70);
+    init_color(_COLOR_GRASS, 494, 588, 66);
+    // init_color(_COLOR_GRASS, 462, 662, 70);
     init_color(_COLOR_FLOWER_RED, 861, 118, 237);
     init_color(_COLOR_FLOWER_YELLOW, 937, 860, 100);
     init_color(_COLOR_FLOWER_VIOLET, 776, 513, 921);
