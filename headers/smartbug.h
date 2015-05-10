@@ -30,8 +30,7 @@ public:
     inline virtual void setPos(Vec2 pos) { _pos = pos; }
     inline virtual int  energy()              { return _energy; }
     inline virtual void setEnergy(int energy) { _energy = energy; }
-    
-    inline char sym() { return _sym; }
+    inline virtual char sym() { return _sym; }
 };
 
 struct SmartBugEgg : public Liver, public Spawner

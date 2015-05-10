@@ -9,7 +9,7 @@ void Mover::move(const DirVecMap& dirs, Direction dir)
     Vec2 newPos = pos() + dirs.at(dir);
     if (home()->checkIfValid(newPos, _canMoveOn))
     {
-        home()->grid.moveChar(pos(), newPos);
+        home()->grid.moveChar(sym(), pos(), newPos);
         setPos(newPos);
     }
 }

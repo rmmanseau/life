@@ -45,9 +45,9 @@ public:
     {
         addChar(pos, Sym::empty);
     }
-    inline void moveChar(Vec2 from, Vec2 to)
+    inline void moveChar(char sym, Vec2 from, Vec2 to)
     {
-        addChar(to, charAt(from));
+        addChar(to, sym);
         removeChar(from);
     }
 };
