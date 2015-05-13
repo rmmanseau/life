@@ -17,7 +17,7 @@ struct SmallPlant : public Liver, public Feeler, public Spawner
 {
     SmallPlant(Terrarium& home, Vec2 pos);
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions);
+    void act(int ID, VecArr& newPlants, VecArr& newFlowers, IntArr& newDeaths, const DirVecMap& directions);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos() { return _pos; }

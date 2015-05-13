@@ -25,7 +25,7 @@ struct C
 
 DumbBug::DumbBug(Terrarium& home, Vec2 pos)
     : Liver(home, pos, C::Bug::energyInitBase, C::Bug::energyInitVar, Sym::dumbBug)
-    , Mover({Sym::empty, Sym::smallPlant})
+    , Mover({Sym::empty, Sym::smallPlant, Sym::flower})
     , Eater({Sym::smallPlant}, C::Bug::energyFromEating)
     , Spawner({Sym::empty}, C::Bug::energyAfterSpawn)
 {}
@@ -35,7 +35,7 @@ void DumbBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap&
     --_energy;
     
     // Die
-    if (_energy <= 0 || _home->grid.charAt(_pos) == Sym::empty)
+    if (_energy <= 0 || wasKilled())
     {
         die(ID, newDeaths);
     }
@@ -69,12 +69,12 @@ DumbBugEgg::DumbBugEgg(Terrarium& home, Vec2 pos)
     , Spawner({Sym::dumbBugEgg}, C::Egg::energyAfterSpawn)
 {}
 
-void DumbBugEgg::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
+void DumbBugEgg::act(int ID, VecArr& newBirths, IntArr& newDeaths)
 {
     ++_energy;
 
     // Die
-    if (_energy <= 0 || _home->grid.charAt(_pos) == Sym::empty)
+    if (_energy <= 0 || wasKilled())
     {
         die(ID, newDeaths);
     }

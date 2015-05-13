@@ -17,6 +17,7 @@ g++ -c -O3 \
         ../../src/smartbug.cpp    \
         ../../src/shrew.cpp       \
         ../../src/smallplant.cpp  \
+        ../../src/flower.cpp      \
 \
 -std=c++11 
 
@@ -36,6 +37,7 @@ g++ \
         smartbug.o    \
         shrew.o       \
         smallplant.o  \
+        flower.o      \
 \
 -lncurses -o ../life
 

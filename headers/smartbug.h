@@ -37,7 +37,7 @@ struct SmartBugEgg : public Liver, public Spawner
 {
     SmartBugEgg(Terrarium& home, Vec2 pos);
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions);
+    void act(int ID, VecArr& newBirths, IntArr& newDeaths);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos() { return _pos; }

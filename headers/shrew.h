@@ -34,4 +34,22 @@ public:
     inline virtual char sym() { return _sym; }
 };
 
+class BabyShrew : public Liver, public Mover, public Spawner
+{
+private:
+    Direction _currentDir;
+    int _spinningClockwise;
+
+public:
+    BabyShrew(Terrarium& home, Vec2 pos);
+
+    void act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions);
+
+    inline virtual Terrarium* home() { return _home; }
+    inline virtual Vec2 pos()            { return _pos; }
+    inline virtual void setPos(Vec2 pos) { _pos = pos; }
+    inline virtual void setEnergy(int energy) { _energy = energy; }
+    inline virtual char sym() { return _sym; }
+};
+
 #endif // SHREW_H

@@ -11,6 +11,8 @@ struct C
 
     static const int neighborsToBlockGrow = 4;
     static const int neighborsToSkipAct = 7;
+
+    static const int flowerChance = 100;
 };
 
 SmallPlant::SmallPlant(Terrarium& home, Vec2 pos)
@@ -18,7 +20,7 @@ SmallPlant::SmallPlant(Terrarium& home, Vec2 pos)
     , Spawner({Sym::empty}, C::energyAfterGrow)
 {}
 
-void SmallPlant::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
+void SmallPlant::act(int ID, VecArr& newPlants, VecArr& newFlowers, IntArr& newDeaths, const DirVecMap& directions)
 {
     int surroundingSmallPlants = numberOfSurrounding(directions, {Sym::smallPlant});
     if (surroundingSmallPlants == C::neighborsToSkipAct)
@@ -35,7 +37,7 @@ void SmallPlant::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecM
     else if (surroundingSmallPlants <= 8)
         _energy += -2;
 
-    if (_energy <= 0 || _home->grid.charAt(_pos) == Sym::empty)
+    if (_energy <= 0 || wasKilled())
     {
         die(ID, newDeaths);
     }
@@ -44,6 +46,9 @@ void SmallPlant::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecM
         Direction newDir = randomDirection();
         Vec2 newPos = _pos + directions.at(newDir);
         if (numberOfSurrounding(newPos, directions, {Sym::smallPlant}) <= C::neighborsToBlockGrow)
-            spawn(directions, newDir, newBirths);
+            if (!(rand() % C::flowerChance))
+                spawn(directions, newDir, newFlowers);
+            else
+                spawn(directions, newDir, newPlants);
     }
 }

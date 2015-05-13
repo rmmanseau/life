@@ -14,6 +14,7 @@
 #define _COLOR_F_SMART 111
 #define _COLOR_M_SHREW 112
 #define _COLOR_F_SHREW 113
+#define _COLOR_B_SHREW 114
 
 namespace Color {
     const int lightRock = 100;
@@ -30,16 +31,16 @@ namespace Color {
     const int egg = 111;
     const int mShrew = 112;
     const int fShrew = 113;
+    const int bShrew = 114;
 }
 
 void createMapColors()
 {
-    init_color(_COLOR_DIRT, 120, 100, 80);
+    init_color(_COLOR_DIRT, 150, 110, 95);
     init_color(_COLOR_LIGHT_ROCK, 650, 630, 610);
     init_color(_COLOR_MIDDLE_ROCK, 550, 530, 510);
     init_color(_COLOR_DARK_ROCK, 450, 435, 425);
-    init_color(_COLOR_GRASS, 494, 588, 66);
-    // init_color(_COLOR_GRASS, 462, 662, 70);
+    init_color(_COLOR_GRASS, 462, 662, 70);
     init_color(_COLOR_FLOWER_RED, 861, 118, 237);
     init_color(_COLOR_FLOWER_YELLOW, 937, 860, 100);
     init_color(_COLOR_FLOWER_VIOLET, 776, 513, 921);
@@ -49,6 +50,7 @@ void createMapColors()
     init_color(_COLOR_EGG, 968, 949, 731);
     init_color(_COLOR_M_SHREW, 674, 553, 470);
     init_color(_COLOR_F_SHREW, 698, 631, 584);
+    init_color(_COLOR_B_SHREW, 710, 641, 584);
 
     init_pair(Color::empty, _COLOR_DIRT, _COLOR_DIRT);
     init_pair(Color::lightRock, _COLOR_LIGHT_ROCK, _COLOR_DIRT);
@@ -64,6 +66,7 @@ void createMapColors()
     init_pair(Color::egg, _COLOR_EGG, _COLOR_DIRT);
     init_pair(Color::mShrew, _COLOR_M_SHREW, _COLOR_DIRT);
     init_pair(Color::fShrew, _COLOR_F_SHREW, _COLOR_DIRT);
+    init_pair(Color::bShrew, _COLOR_B_SHREW, _COLOR_DIRT);
 }
 
 WorldDrawer::WorldDrawer(const std::string& world, int worldX, int worldY)
@@ -128,7 +131,8 @@ void WorldDrawer::draw(int offX, int offY) {
 
     print(Sym::empty, Color::empty, offX, offY);
     print(Sym::rock, {Color::midRock, Color::lightRock, Color::darkRock}, 2, offX, offY);
-    print(Sym::smallPlant, {Color::grass, Color::flowerRed, Color::flowerYellow, Color::flowerViolet}, 30, offX, offY);
+    print(Sym::smallPlant, Color::grass, offX, offY);
+    print(Sym::flower, {Color::flowerRed, Color::flowerYellow, Color::flowerViolet}, 1, offX, offY);
     print(Sym::dumbBug, Color::dumbBug, offX, offY);
     print(Sym::dumbBugEgg, Color::egg, offX, offY);
     print(Sym::mSmartBug, Color::mSmartBug, offX, offY);
@@ -136,6 +140,7 @@ void WorldDrawer::draw(int offX, int offY) {
     print(Sym::smartBugEgg, Color::egg, offX, offY);
     print(Sym::mShrew, Color::mShrew, offX, offY);
     print(Sym::fShrew, Color::fShrew, offX, offY);
+    print(Sym::bShrew, Color::bShrew, offX, offY);
 
     _changes.clear();
 }

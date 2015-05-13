@@ -26,10 +26,10 @@ struct C
 
 SmartBug::SmartBug(Terrarium& home, Vec2 pos, char sym)
     : Liver(home, pos, C::Bug::energyInitBase, C::Bug::energyInitVar, sym)
-    , Mover({Sym::empty, Sym::smallPlant})
-    , Seer(C::Bug::sightDistance, {Sym::empty})
-    , Eater({Sym::smallPlant}, C::Bug::energyFromEating)
-    , Spawner({Sym::empty, Sym::smallPlant}, C::Bug::energyAfterSpawn)
+    , Mover({Sym::empty, Sym::smallPlant, Sym::flower})
+    , Seer(C::Bug::sightDistance, {Sym::empty, Sym::smallPlant, Sym::flower})
+    , Eater({Sym::smallPlant, Sym::flower}, C::Bug::energyFromEating)
+    , Spawner({Sym::empty, Sym::smallPlant, Sym::flower}, C::Bug::energyAfterSpawn)
 {
     if (_sym == '#')
     {
@@ -43,7 +43,7 @@ void SmartBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap
     --_energy;
     
     // Die
-    if (_energy <= 0 || _home->grid.charAt(_pos) == Sym::empty)
+    if (_energy <= 0 || wasKilled())
     {
         die(ID, newDeaths);
     }
@@ -105,12 +105,12 @@ SmartBugEgg::SmartBugEgg(Terrarium& home, Vec2 pos)
     , Spawner({Sym::smartBugEgg}, C::Egg::energyAfterSpawn)
 {}
 
-void SmartBugEgg::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
+void SmartBugEgg::act(int ID, VecArr& newBirths, IntArr& newDeaths)
 {
     ++_energy;
 
     // Die
-    if (_energy <= 0 || _home->grid.charAt(_pos) == Sym::empty)
+    if (_energy <= 0 || wasKilled())
     {
         die(ID, newDeaths);
     }

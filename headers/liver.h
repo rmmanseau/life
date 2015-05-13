@@ -18,6 +18,7 @@ public:
     Liver(Terrarium& home, Vec2 pos, int energyBase, int energyVar, char sym);
 
     virtual void die(int ID, IntArr& deaths);
+    virtual bool wasKilled();
 
     virtual Terrarium* home() = 0;
     virtual Vec2 pos() = 0;

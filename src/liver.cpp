@@ -16,3 +16,8 @@ void Liver::die(int ID, IntArr& deaths)
     home()->grid.removeChar(pos());
     deaths.push_back(ID);
 }
+
+bool Liver::wasKilled()
+{
+    return home()->grid.charAt(pos()) == Sym::empty;
+}

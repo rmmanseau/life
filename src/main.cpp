@@ -15,6 +15,7 @@
 #include "../headers/smartbug.h"
 #include "../headers/shrew.h"
 #include "../headers/smallplant.h"
+#include "../headers/flower.h"
 
 ///=== Settings ================================================================
 #define SIMPLEMODE false
@@ -28,46 +29,104 @@ int statOffX = 2;
 int statOffY = 0;
 ///=============================================================================
 
-template <typename T, typename U>
-int letAct(Terrarium& t, const DirVecMap& directions, std::vector<T>& lifeForms, std::vector<U>& newBirths)
+/**
+ *  This lambda and template heavy act iteration system is
+ *  very cumbersome, and I can see it getting in the way
+ *  if I add much more complexity. It would probably be worth it
+ *  to just remove these functions and iterate through each
+ *  vector individually in main.
+ *  
+ *  I could be wrong, but I also think it's contributing to slow ass
+ *  compile times. That would be good to check.
+ *  
+ *  Might also have to do with the mass amount of files. Looking
+ *  into a build system might be a good idea but for unknown
+ *  reasons I feel the need to reject them. If a non build system
+ *  approach exists, take that.
+ *  
+ *  ALSO, look into loading things from text files. Would make
+ *  trying new colors, maps, and life constants waaaaaaaaaay
+ *  easier.
+ */
+
+template <typename T>
+void mergeDeaths(std::vector<T>& living, IntArr& newDeaths)
 {
-    if (lifeForms.size() == 0)
-        return 0;
-
-    VecArr birthVec;
-    IntArr deathVec;
-    int newBirthAmount;
-
-    for (int i = 0; i < lifeForms.size(); ++i)
+    while (!newDeaths.empty())
     {
-        lifeForms[i].act(i, birthVec, deathVec, directions);
+        int ID = newDeaths.back();
+        newDeaths.pop_back();
+        living.erase(living.begin() + ID);
     }
-
-    while (!deathVec.empty())
-    {
-        int ID = deathVec.back();
-        deathVec.pop_back();
-        lifeForms.erase(lifeForms.begin() + ID);
-    }
-
-    newBirthAmount = birthVec.size();
-
-    while (!birthVec.empty())
-    {
-        Vec2 birthPlace = birthVec.back();
-        birthVec.pop_back();
-        U newBorn(t, birthPlace);
-        t.grid.addChar(birthPlace, newBorn.sym());
-        newBirths.push_back(newBorn);
-    }
-
-    return newBirthAmount;
 }
 
 template <typename T>
-int letAct(Terrarium& t, const DirVecMap& directions, std::vector<T>& lifeForms)
+int mergeBirths(Terrarium& t, std::vector<T>& living, VecArr& newBirths)
 {
-    return letAct(t, directions, lifeForms, lifeForms);
+    int newBirthAmount = newBirths.size();
+    while (!newBirths.empty())
+    {
+        Vec2 birthPlace = newBirths.back();
+        newBirths.pop_back();
+        T newBorn(t, birthPlace);
+        t.grid.addChar(birthPlace, newBorn.sym());
+        living.push_back(newBorn);
+    }
+    return newBirthAmount;
+}
+
+template <typename P, typename C, typename F>
+void letAct(Terrarium& t, std::vector<P>& parents, std::vector<C>& children, F act)
+{
+    if (parents.size() == 0) return;
+
+    VecArr newBirths;
+    IntArr newDeaths;
+
+    for (int i = 0; i < parents.size(); ++i)
+    {
+        act(i, parents.at(i), newBirths, newDeaths);
+    }
+
+    mergeDeaths(parents, newDeaths);
+    mergeBirths(t, children, newBirths);
+}
+
+template <typename P, typename C, typename F>
+void letAct(Terrarium& t, int& counter, std::vector<P>& parents, std::vector<C>& children, F act)
+{
+    if (parents.size() == 0) return;
+
+    VecArr newBirths;
+    IntArr newDeaths;
+
+    for (int i = 0; i < parents.size(); ++i)
+    {
+        act(i, parents.at(i), newBirths, newDeaths);
+    }
+
+    mergeDeaths(parents, newDeaths);
+    counter += mergeBirths(t, children, newBirths);
+}
+
+template <typename P, typename C, typename C1, typename F>
+void letAct(Terrarium& t, int& counter, std::vector<P>& parents, std::vector<C>& children1, std::vector<C1>& children2, F act)
+{
+    if (parents.size() == 0) return;
+
+    VecArr newBirths1;
+    VecArr newBirths2;
+    IntArr newDeaths;
+
+    for (int i = 0; i < parents.size(); ++i)
+    {
+        act(i, parents.at(i), newBirths1, newBirths2, newDeaths);
+    }
+
+    mergeDeaths(parents, newDeaths);
+
+    counter += mergeBirths(t, children1, newBirths1);
+    counter += mergeBirths(t, children2, newBirths2);
 }
 
 int main(int argc, char* argv[])
@@ -94,6 +153,14 @@ int main(int argc, char* argv[])
             map = World::test;
         else if (mapName == "test1")
             map = World::test1;
+        else if (mapName == "seedBig")
+            map = World::seedBig;
+        else if (mapName == "big")
+            map = World::big;
+        else if (mapName == "dumbBig")
+            map = World::dumbBig;
+        else if (mapName == "smartBig")
+            map = World::smartBig;
         
         if (argc > 2)
         {
@@ -138,10 +205,12 @@ int main(int argc, char* argv[])
 
     std::vector<DumbBug> dumbBugs;
     std::vector<DumbBugEgg> dumbBugEggs;
-    std::vector<SmallPlant> smallPlants;
     std::vector<SmartBug> smartBugs;
     std::vector<SmartBugEgg> smartBugEggs;
     std::vector<Shrew> shrews;
+    std::vector<BabyShrew> babyShrews;
+    std::vector<SmallPlant> smallPlants;
+    std::vector<Flower> flowers;
 
     for (int y = 0; y < t.grid.y; ++y) {
         for (int x = 0; x < t.grid.x; ++x) {
@@ -156,10 +225,6 @@ int main(int argc, char* argv[])
 
                 case Sym::dumbBugEgg:
                     dumbBugEggs.push_back(DumbBugEgg(t, pos));
-                    break;
-
-                case Sym::smallPlant:
-                    smallPlants.push_back(SmallPlant(t, pos));
                     break;
 
                 case Sym::mSmartBug:
@@ -180,6 +245,18 @@ int main(int argc, char* argv[])
 
                 case Sym::fShrew:
                     shrews.push_back(Shrew(t, pos, Sym::fShrew));
+                    break;
+
+                case Sym::bShrew:
+                    babyShrews.push_back(BabyShrew(t, pos));
+                    break;
+
+                case Sym::smallPlant:
+                    smallPlants.push_back(SmallPlant(t, pos));
+                    break;
+
+                case Sym::flower:
+                    flowers.push_back(Flower(t, pos));
                     break;
             }
         }
@@ -249,12 +326,49 @@ int main(int argc, char* argv[])
                 SIM LOOP
 ==============================================================================*/
 
-                                      letAct(t, directions, dumbBugs, dumbBugEggs);
-            stats.totalDumbBugs +=    letAct(t, directions, dumbBugEggs, dumbBugs);
-            stats.totalSmallPlants += letAct(t, directions, smallPlants);
-                                      letAct(t, directions, smartBugs, smartBugEggs);
-            stats.totalSmartBugs +=   letAct(t, directions, smartBugEggs, smartBugs);
-            stats.totalShrews +=      letAct(t, directions, shrews);
+            // Action Loops
+
+            // Dumb Bug
+            letAct(t, dumbBugs, dumbBugEggs, 
+                   [&directions](int i, DumbBug& actor, VecArr& newBirths, IntArr& newDeaths){
+                actor.act(i, newBirths, newDeaths, directions);
+            });
+
+            // Dumb Bug Egg
+            letAct(t, stats.totalDumbBugs, dumbBugEggs, dumbBugs, 
+                   [](int i, DumbBugEgg& actor, VecArr& newBirths, IntArr& newDeaths){
+                actor.act(i, newBirths, newDeaths);
+            });
+            
+            // Small Plant
+            letAct(t, stats.totalSmallPlants, smallPlants, smallPlants, flowers,
+                   [&directions](int i, SmallPlant& actor, VecArr& newPlants, VecArr& newFlowers, IntArr& newDeaths){
+                actor.act(i, newPlants, newFlowers, newDeaths, directions);
+            });
+            
+            // Smart Bug
+            letAct(t, smartBugs, smartBugEggs, 
+                   [&directions](int i, SmartBug& actor, VecArr& newBirths, IntArr& newDeaths){
+                actor.act(i, newBirths, newDeaths, directions);
+            });
+
+            // Smart Bug Egg
+            letAct(t, stats.totalSmartBugs, smartBugEggs, smartBugs, 
+                   [](int i, SmartBugEgg& actor, VecArr& newBirths, IntArr& newDeaths){
+                actor.act(i, newBirths, newDeaths);
+            });
+
+            // Shrew
+            letAct(t, shrews, babyShrews, 
+                   [&directions](int i, Shrew& actor, VecArr& newBirths, IntArr& newDeaths){
+                actor.act(i, newBirths, newDeaths, directions);
+            });
+
+            // Baby Shrew
+            letAct(t, stats.totalShrews, babyShrews, shrews, 
+                   [&directions](int i, BabyShrew& actor, VecArr& newBirths, IntArr& newDeaths){
+                actor.act(i, newBirths, newDeaths, directions);
+            });
 
             float msCycleTime = (float)((clock() - cycleTime)/100);
             float msDelay = msFrameSpeed - msCycleTime;

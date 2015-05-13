@@ -2,40 +2,46 @@
 
 struct C
 {
-    struct Grown
+    struct Adlt
     {
         static const int energyInitBase   = 600; //600
         static const int energyInitVar    = 100; //100
-        static const int energyFull       = 800; //800
+        static const int energyFull       = 1000; //800
+        static const int energyHunting    = 1100;
         static const int energyFromEating = 200; //200
         static const int energyToSpawn    = 700; //700
-        static const int energyAfterSpawn = 300; //300
+        static const int energyAfterSpawn = 500; //300
 
         static const int whimsyInit          = 100; //100
         static const int whimsyFromEating    = 50;  //50
-        static const int whimsyFromSpawning  = 100; //100
-        // static const int whimsyFromTurning   = 2;   //2
-        static const int whimsyThreshold     = 150;  //15
+        static const int whimsyFromSpawning  = 75;  //100
+        static const int whimsyThreshold     = 600; //150
+        static const int whimsyDrain         = 4;  //4
 
         static const int sightDistance   = 15; //15  
-        static const int directionChance = 15; //10  // 1/x chance
+        static const int directionChance = 15; //15  // 1/x chance
         static const int spinChance      = 20; //20
     };
 
     struct Baby
     {
+        static const int energyInitBase = 40;  //40
+        static const int energyInitVar = 10;   //10
+        static const int energyToSpawn = 200;  //200
+        static const int energyAfterSpawn = 0; //0
 
+        static const int spinChance = 8; // 8
     };
 };
 
 Shrew::Shrew(Terrarium& home, Vec2 pos, char sym)
-    : Liver(home, pos, C::Grown::energyInitBase, C::Grown::energyInitVar, sym)
-    , Mover({Sym::empty, Sym::smallPlant})
-    , Seer(C::Grown::sightDistance, {Sym::empty, Sym::smallPlant})
-    , Eater({Sym::dumbBug, Sym::mSmartBug, Sym::fSmartBug}, C::Grown::energyFromEating)
-    , Spawner({Sym::empty, Sym::smallPlant}, C::Grown::energyAfterSpawn)
-    , _whimsy(C::Grown::whimsyInit)
-    , _directionChance(C::Grown::directionChance)
+    : Liver(home, pos, C::Adlt::energyInitBase, C::Adlt::energyInitVar, sym)
+    , Mover({Sym::empty, Sym::smallPlant, Sym::flower})
+    , Seer(C::Adlt::sightDistance, {Sym::empty, Sym::smallPlant, Sym::flower})
+    , Eater({Sym::dumbBug, Sym::mSmartBug, Sym::fSmartBug}, C::Adlt::energyFromEating)
+    , Spawner({Sym::empty, Sym::smallPlant, Sym::flower}, C::Adlt::energyAfterSpawn)
+    , _whimsy(C::Adlt::whimsyInit)
+    , _directionChance(C::Adlt::directionChance)
     , _spinning(false)
     , _spinningClockwise(true)
 {
@@ -50,10 +56,10 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
 {
     --_energy;
 
-    if (_energy < 600)
-        _whimsy -= 2;
+    if (_energy < C::Adlt::whimsyThreshold)
+        _whimsy -= C::Adlt::whimsyDrain;
 
-    if (_whimsy > C::Grown::whimsyThreshold)
+    if (_whimsy > C::Adlt::whimsyThreshold)
     {
         _spinning = true;
         _directionChance = 2;
@@ -61,32 +67,32 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
     else
     {
         _spinning = false;
-        _directionChance = C::Grown::directionChance;
+        _directionChance = C::Adlt::directionChance;
     }
 
     // Die
-    if (_energy < 0 || _home->grid.charAt(_pos) == Sym::empty)
+    if (_energy < 0 || wasKilled())
     {
         die(ID, newDeaths);
     }
     // Eat
-    else if (_energy < C::Grown::energyFull
+    else if (_energy < C::Adlt::energyFull
              && surroundingsContain(directions, _canEat))
     {
         feelSurroundings(directions);
         Direction foodDir = randomElementOfIndex(_canEat, _feelable);
         eat(directions, foodDir);
-        _whimsy += C::Grown::whimsyFromEating;
+        _whimsy += C::Adlt::whimsyFromEating;
     }
     // Spawn
     else if (_sym == Sym::fShrew
-             && _energy >= C::Grown::energyToSpawn
+             && _energy >= C::Adlt::energyToSpawn
              && surroundingsContain(directions, {Sym::mShrew}))
     {
         feelSurroundings(directions);
         Direction mateDir = randomElementOfIndex(_canSpawnOn, _feelable);
         spawn(directions, mateDir, newBirths);
-        _whimsy += C::Grown::whimsyFromSpawning;
+        _whimsy += C::Adlt::whimsyFromSpawning;
     }
     // View Surroundings
     else
@@ -95,7 +101,7 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
         viewSurroundings(directions);
 
         // Walk To Food
-        if (_energy <= C::Grown::energyFull
+        if (_energy <= C::Adlt::energyHunting
             && sightContains(_canEat))
         {
             _currentDir = randomElementOfIndex(_canEat, _seeable);
@@ -115,7 +121,7 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
             // Spin
             if (_spinning)
             {
-                if (rand() % C::Grown::spinChance == 0)
+                if (rand() % C::Adlt::spinChance == 0)
                     _spinningClockwise = !_spinningClockwise;
 
                 if (_spinningClockwise)
@@ -136,5 +142,40 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
         {
             move(directions, _currentDir);
         }
+    }
+}
+
+BabyShrew::BabyShrew(Terrarium& home, Vec2 pos)
+    : Liver(home, pos, C::Baby::energyInitBase, C::Baby::energyInitVar, Sym::bShrew)
+    , Mover({Sym::empty, Sym::smallPlant, Sym::flower})
+    , Spawner({Sym::bShrew}, C::Baby::energyAfterSpawn)
+    , _spinningClockwise(false)
+{
+    _currentDir = randomDirection();   
+}
+
+void BabyShrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
+{
+    ++_energy;
+
+    if (_energy < 0 || wasKilled())
+    {
+        die(ID, newDeaths);
+    }
+    else if (_energy > C::Baby::energyToSpawn)
+    {
+        spawn(newBirths);
+    }
+    else
+    {
+        if (rand() % C::Baby::spinChance == 0)
+            _spinningClockwise = !_spinningClockwise;
+
+        if (_spinningClockwise)
+            _currentDir = clockwiseOf(_currentDir);
+        else
+            _currentDir = counterClockwiseOf(_currentDir);
+
+        move(directions, _currentDir);
     }
 }
