@@ -18,8 +18,6 @@
 #include "../headers/flower.h"
 
 ///=== Settings ================================================================
-#define SIMPLEMODE false
-
 float msFrameSpeed = 0.1;
 std::string map = World::test;
 
@@ -28,26 +26,6 @@ int winOffY = 2;
 int statOffX = 2;
 int statOffY = 0;
 ///=============================================================================
-
-/**
- *  This lambda and template heavy act iteration system is
- *  very cumbersome, and I can see it getting in the way
- *  if I add much more complexity. It would probably be worth it
- *  to just remove these functions and iterate through each
- *  vector individually in main.
- *  
- *  I could be wrong, but I also think it's contributing to slow ass
- *  compile times. That would be good to check.
- *  
- *  Might also have to do with the mass amount of files. Looking
- *  into a build system might be a good idea but for unknown
- *  reasons I feel the need to reject them. If a non build system
- *  approach exists, take that.
- *  
- *  ALSO, look into loading things from text files. Would make
- *  trying new colors, maps, and life constants waaaaaaaaaay
- *  easier.
- */
 
 template <typename T>
 void mergeDeaths(std::vector<T>& living, IntArr& newDeaths)
@@ -58,6 +36,7 @@ void mergeDeaths(std::vector<T>& living, IntArr& newDeaths)
         newDeaths.pop_back();
         living.erase(living.begin() + ID);
     }
+    newDeaths.clear();
 }
 
 template <typename T>
@@ -72,65 +51,13 @@ int mergeBirths(Terrarium& t, std::vector<T>& living, VecArr& newBirths)
         t.grid.addChar(birthPlace, newBorn.sym());
         living.push_back(newBorn);
     }
+    newBirths.clear();
     return newBirthAmount;
-}
-
-template <typename P, typename C, typename F>
-void letAct(Terrarium& t, std::vector<P>& parents, std::vector<C>& children, F act)
-{
-    if (parents.size() == 0) return;
-
-    VecArr newBirths;
-    IntArr newDeaths;
-
-    for (int i = 0; i < parents.size(); ++i)
-    {
-        act(i, parents.at(i), newBirths, newDeaths);
-    }
-
-    mergeDeaths(parents, newDeaths);
-    mergeBirths(t, children, newBirths);
-}
-
-template <typename P, typename C, typename F>
-void letAct(Terrarium& t, int& counter, std::vector<P>& parents, std::vector<C>& children, F act)
-{
-    if (parents.size() == 0) return;
-
-    VecArr newBirths;
-    IntArr newDeaths;
-
-    for (int i = 0; i < parents.size(); ++i)
-    {
-        act(i, parents.at(i), newBirths, newDeaths);
-    }
-
-    mergeDeaths(parents, newDeaths);
-    counter += mergeBirths(t, children, newBirths);
-}
-
-template <typename P, typename C, typename C1, typename F>
-void letAct(Terrarium& t, int& counter, std::vector<P>& parents, std::vector<C>& children1, std::vector<C1>& children2, F act)
-{
-    if (parents.size() == 0) return;
-
-    VecArr newBirths1;
-    VecArr newBirths2;
-    IntArr newDeaths;
-
-    for (int i = 0; i < parents.size(); ++i)
-    {
-        act(i, parents.at(i), newBirths1, newBirths2, newDeaths);
-    }
-
-    mergeDeaths(parents, newDeaths);
-
-    counter += mergeBirths(t, children1, newBirths1);
-    counter += mergeBirths(t, children2, newBirths2);
 }
 
 int main(int argc, char* argv[])
 {
+    // World Argument Handler
     if (argc > 1)
     {
         std::string mapName;
@@ -162,6 +89,7 @@ int main(int argc, char* argv[])
         else if (mapName == "smartBig")
             map = World::smartBig;
         
+        // Speed Argument Handler
         if (argc > 2)
         {
             std::stringstream convert1(argv[2]);
@@ -171,6 +99,7 @@ int main(int argc, char* argv[])
 
     srand(time(0));
 
+    // Create Directions
     DirVecMap directions;
     directions[n]  = Vec2( 0, -1);
     directions[ne] = Vec2( 1, -1);
@@ -181,6 +110,7 @@ int main(int argc, char* argv[])
     directions[w]  = Vec2(-1,  0);
     directions[nw] = Vec2(-1, -1);
 
+    // Create Terrarium
     Terrarium t(map);
 
     // ncurses stuff
@@ -191,6 +121,12 @@ int main(int argc, char* argv[])
     timeout(0);
     curs_set(0);
 
+    /**
+     * Simplemode does not include:
+     *  - color
+     *  - stats
+     *  - world drawer
+     */
     #if !SIMPLEMODE
         start_color();
         WorldDrawer picasso(map, t.grid.x, t.grid.y);
@@ -201,6 +137,8 @@ int main(int argc, char* argv[])
         Stats stats;
         statOffX += winOffX + t.grid.x;
         statOffY += winOffY;
+
+        bool colorUpdated = false;
     #endif
 
     std::vector<DumbBug> dumbBugs;
@@ -262,11 +200,13 @@ int main(int argc, char* argv[])
         }
     }
 
+#if !SIMPLEMODE
     stats.totalDumbBugs = dumbBugs.size();
     stats.totalSmartBugs = smartBugs.size();
     stats.totalSmallPlants = smallPlants.size();
     stats.totalShrews = shrews.size();
-
+#endif
+    
     clock_t cycleTime;
     float longestCycle = 0;
     int totalCycles = 0;
@@ -317,70 +257,125 @@ int main(int argc, char* argv[])
 
         if (paused)
         {
+            colorUpdated = false;
             napms(100);
         }
         else
         {
+            if (!colorUpdated) {   
+                picasso.updateColors();
+                colorUpdated = true;
+            }
 
 /*==============================================================================            
                 SIM LOOP
 ==============================================================================*/
 
             // Action Loops
+            VecArr newBirths;
+            IntArr newDeaths;
 
             // Dumb Bug
-            letAct(t, dumbBugs, dumbBugEggs, 
-                   [&directions](int i, DumbBug& actor, VecArr& newBirths, IntArr& newDeaths){
-                actor.act(i, newBirths, newDeaths, directions);
-            });
+            if (dumbBugs.size())
+            {
+                forEach(dumbBugs, [&](DumbBug& l, int id){
+                    l.act(id, newBirths, newDeaths, directions);
+                });
+
+                mergeDeaths(dumbBugs, newDeaths);
+                mergeBirths(t, dumbBugEggs, newBirths);
+            }
 
             // Dumb Bug Egg
-            letAct(t, stats.totalDumbBugs, dumbBugEggs, dumbBugs, 
-                   [](int i, DumbBugEgg& actor, VecArr& newBirths, IntArr& newDeaths){
-                actor.act(i, newBirths, newDeaths);
-            });
-            
-            // Small Plant
-            letAct(t, stats.totalSmallPlants, smallPlants, smallPlants, flowers,
-                   [&directions](int i, SmallPlant& actor, VecArr& newPlants, VecArr& newFlowers, IntArr& newDeaths){
-                actor.act(i, newPlants, newFlowers, newDeaths, directions);
-            });
-            
+            if (dumbBugEggs.size())
+            {
+                forEach(dumbBugEggs, [&](DumbBugEgg& l, int id){
+                    l.act(id, newBirths, newDeaths);
+                });
+
+                mergeDeaths(dumbBugEggs, newDeaths);
+#if !SIMPLEMODE
+                stats.totalDumbBugs +=
+#endif  
+                mergeBirths(t, dumbBugs, newBirths);
+            }
+
             // Smart Bug
-            letAct(t, smartBugs, smartBugEggs, 
-                   [&directions](int i, SmartBug& actor, VecArr& newBirths, IntArr& newDeaths){
-                actor.act(i, newBirths, newDeaths, directions);
-            });
+            if (smartBugs.size())
+            {
+                forEach(smartBugs, [&](SmartBug& l, int id){
+                    l.act(id, newBirths, newDeaths, directions);
+                });
+
+                mergeDeaths(smartBugs, newDeaths);
+                mergeBirths(t, smartBugEggs, newBirths);
+            }
 
             // Smart Bug Egg
-            letAct(t, stats.totalSmartBugs, smartBugEggs, smartBugs, 
-                   [](int i, SmartBugEgg& actor, VecArr& newBirths, IntArr& newDeaths){
-                actor.act(i, newBirths, newDeaths);
-            });
+            if (smartBugEggs.size())
+            {
+                forEach(smartBugEggs, [&](SmartBugEgg& l, int id){
+                    l.act(id, newBirths, newDeaths);
+                });
 
+                mergeDeaths(smartBugEggs, newDeaths);
+#if !SIMPLEMODE
+                stats.totalSmartBugs +=
+#endif
+                mergeBirths(t, smartBugs, newBirths);
+            }
+            
             // Shrew
-            letAct(t, shrews, babyShrews, 
-                   [&directions](int i, Shrew& actor, VecArr& newBirths, IntArr& newDeaths){
-                actor.act(i, newBirths, newDeaths, directions);
-            });
+            if (shrews.size())
+            {
+                forEach(shrews, [&](Shrew& l, int id){
+                    l.act(id, newBirths, newDeaths, directions);
+                });
+
+                mergeDeaths(shrews, newDeaths);
+                mergeBirths(t, babyShrews, newBirths);
+            }
 
             // Baby Shrew
-            letAct(t, stats.totalShrews, babyShrews, shrews, 
-                   [&directions](int i, BabyShrew& actor, VecArr& newBirths, IntArr& newDeaths){
-                actor.act(i, newBirths, newDeaths, directions);
-            });
+            if (babyShrews.size())
+            {
+                forEach(babyShrews, [&](BabyShrew& l, int id){
+                    l.act(id, newBirths, newDeaths, directions);
+                });
 
+                mergeDeaths(babyShrews, newDeaths);
+#if !SIMPLEMODE
+                stats.totalShrews +=
+#endif
+                mergeBirths(t, shrews, newBirths);
+            }
+
+            // Small Plant
+            if (smallPlants.size())
+            {
+                VecArr newFlowers;
+
+                forEach(smallPlants, [&](SmallPlant& l, int id){
+                    l.act(id, newBirths, newFlowers, newDeaths, directions);
+                });
+
+                mergeDeaths(smallPlants, newDeaths);
+#if !SIMPLEMODE
+                stats.totalSmallPlants +=
+#endif
+                mergeBirths(t, smallPlants, newBirths);
+                mergeBirths(t, flowers, newFlowers);
+            }
+            
             float msCycleTime = (float)((clock() - cycleTime)/100);
             float msDelay = msFrameSpeed - msCycleTime;
 
             if (msDelay > 0)
                 napms(msDelay);
 
-            #if SIMPLEMODE
-                mvprintw(0, 0, "%s", t.grid.map.c_str());
-            #else
-                picasso.draw(winOffX, winOffY);
-            #endif
+#if !SIMPLEMODE
+
+            picasso.draw(winOffX, winOffY);
 
             if (totalCycles > 20 && longestCycle < msCycleTime)
                 longestCycle = msCycleTime;
@@ -408,10 +403,11 @@ int main(int argc, char* argv[])
                                 + shrews.size();
             
             ++totalCycles;
-            
-            #if !SIMPLEMODE
-                tukey.draw(stats, statOffX, statOffY);
-            #endif
+
+            tukey.draw(stats, statOffX, statOffY);
+#else
+            mvprintw(0, 0, "%s", t.grid.map.c_str());
+#endif
         }
     }
     refresh();

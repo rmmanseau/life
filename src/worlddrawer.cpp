@@ -1,4 +1,5 @@
 #include "../headers/worlddrawer.h"
+#include <fstream>
 
 #define _COLOR_DIRT 100
 #define _COLOR_LIGHT_ROCK 101
@@ -34,23 +35,14 @@ namespace Color {
     const int bShrew = 114;
 }
 
-void createMapColors()
+void WorldDrawer::updateColors()
 {
-    init_color(_COLOR_DIRT, 150, 110, 95);
-    init_color(_COLOR_LIGHT_ROCK, 650, 630, 610);
-    init_color(_COLOR_MIDDLE_ROCK, 550, 530, 510);
-    init_color(_COLOR_DARK_ROCK, 450, 435, 425);
-    init_color(_COLOR_GRASS, 462, 662, 70);
-    init_color(_COLOR_FLOWER_RED, 861, 118, 237);
-    init_color(_COLOR_FLOWER_YELLOW, 937, 860, 100);
-    init_color(_COLOR_FLOWER_VIOLET, 776, 513, 921);
-    init_color(_COLOR_DUMB, 850, 840, 820);
-    init_color(_COLOR_M_SMART, 522, 800, 937);
-    init_color(_COLOR_F_SMART, 522, 933, 933);
-    init_color(_COLOR_EGG, 968, 949, 731);
-    init_color(_COLOR_M_SHREW, 674, 553, 470);
-    init_color(_COLOR_F_SHREW, 698, 631, 584);
-    init_color(_COLOR_B_SHREW, 710, 641, 584);
+    IntRGBMap importedColors = importColors();
+
+    for (auto it = importedColors.begin(); it != importedColors.end(); ++it)
+    {
+        init_color(it->first, it->second.r, it->second.g, it->second.b);
+    }
 
     init_pair(Color::empty, _COLOR_DIRT, _COLOR_DIRT);
     init_pair(Color::lightRock, _COLOR_LIGHT_ROCK, _COLOR_DIRT);
@@ -80,7 +72,7 @@ WorldDrawer::WorldDrawer(const std::string& world, int worldX, int worldY)
         }
     }
 
-    createMapColors();
+    updateColors();
 }
 void WorldDrawer::print(char sym, int color, int offX, int offY)
 {

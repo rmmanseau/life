@@ -6,13 +6,10 @@
 
 #include "terrarium.h"
 #include "enums.h"
+#include "helpers.h"
 
 class Feeler
 {
-private:
-    template <typename F>
-    void forEachDir(const DirVecMap& dirs, F action);
-
 protected:
     CharDirMap _feelable;
 
@@ -25,14 +22,5 @@ public:
     virtual Terrarium* home() = 0;
     virtual Vec2 pos() = 0;
 };
-
-template <typename F>
-void Feeler::forEachDir(const DirVecMap& dirs, F action)
-{
-    for (int i = 0; i < dirs.size(); ++i)
-    {
-        action((Direction)i);
-    }
-}
 
 #endif // FEELER_H

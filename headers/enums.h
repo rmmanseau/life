@@ -5,6 +5,7 @@
 #include <vector>
 #include "vec2.h"
 
+#define SIMPLEMODE false
 
 enum Direction { 
     n,

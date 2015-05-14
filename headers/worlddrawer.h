@@ -5,6 +5,7 @@
 #include <string>
 #include <ncurses.h>
 
+#include "imports.h"
 #include "enums.h"
 #include "vec2.h"
 
@@ -18,6 +19,7 @@ class WorldDrawer
 public:
     WorldDrawer() {}
     WorldDrawer(const std::string& world, int worldX, int worldY);
+    void updateColors();
     void draw(int offX, int offY);
 
     inline void recordChange(char sym, Vec2 pos) {

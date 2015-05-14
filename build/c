@@ -5,6 +5,7 @@ g++ -c -O3 \
         ../../src/main.cpp        \
         ../../src/grid.cpp        \
         ../../src/terrarium.cpp   \
+        ../../src/imports.cpp     \
         ../../src/worlddrawer.cpp \
         ../../src/statdrawer.cpp  \
         ../../src/liver.cpp       \
@@ -25,6 +26,7 @@ g++ \
         main.o        \
         grid.o        \
         terrarium.o   \
+        imports.o   \
         worlddrawer.o \
         statdrawer.o  \
         liver.o       \

@@ -5,6 +5,24 @@
 #include <vector>
 #include <map>
 
+template <typename T, typename F>
+void forEach(T& container, F action)
+{
+        for (int i = 0; i < container.size(); ++i)
+        {
+            action(container[i], i);
+        }
+}
+
+template <typename F>
+void forEachDir(const DirVecMap& dirs, F action)
+{
+    for (int i = 0; i < dirs.size(); ++i)
+    {
+        action((Direction)i);
+    }
+}
+
 template <typename T1, typename T2>
 T2 randomElement(const std::map<T1, T2>& container)
 {
