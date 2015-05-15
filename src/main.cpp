@@ -16,7 +16,7 @@
 #include "../headers/shrew.h"
 #include "../headers/smallplant.h"
 #include "../headers/flower.h"
-// SIMPLEMODE
+
 ///=== Settings ================================================================
 float msFrameSpeed = 15;
 
@@ -24,7 +24,8 @@ int winOffX = 4;
 int winOffY = 2;
 int statOffX = 2;
 int statOffY = 0;
-///=============================================================================
+
+//=== Functions exclusive to main ==============================================
 
 template <typename T>
 void mergeDeaths(std::vector<T>& living, IntArr& newDeaths)
@@ -66,10 +67,11 @@ void printWorldNames(StrStrMap& worlds)
 
 int main(int argc, char* argv[])
 {
-
+    // Loads worlds into a map
     StrStrMap worlds;
     importMaps(worlds);
 
+    // Can't call ./life without a world argument
     if (argc == 1)
     {
         std::cout << "Can not start without a world!\n";
@@ -78,12 +80,12 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    // World Selection
-
+    // Grabs world argument
     std::string worldName;
     std::stringstream convert2(argv[1]);
     convert2 >> worldName;
 
+    // Assures that it is a valid name
     if (worlds.count(worldName) == 0)
     {
         std::cout << "No such world!\n";
@@ -92,6 +94,7 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
+    // Sets world string to selected world
     std::string world = worlds.at(worldName);
     
     // Speed Selection (Optional)
@@ -114,7 +117,7 @@ int main(int argc, char* argv[])
     directions[w]  = Vec2(-1,  0);
     directions[nw] = Vec2(-1, -1);
 
-    // Create Terrarium
+    // Create Terrarium with world string
     Terrarium t(world);
 
     // ncurses stuff
@@ -126,6 +129,7 @@ int main(int argc, char* argv[])
     curs_set(0);
     start_color();
 
+    // Create Picasso and Tukey
     WorldDrawer picasso(t.grid.map, t.grid.x, t.grid.y);
     t.grid.assignDrawer(picasso);
     picasso.draw(winOffX, winOffY);
@@ -135,6 +139,7 @@ int main(int argc, char* argv[])
     statOffX += winOffX + t.grid.x;
     statOffY += winOffY;
 
+    // Life Vectors
     std::vector<DumbBug> dumbBugs;
     std::vector<DumbBugEgg> dumbBugEggs;
     std::vector<SmartBug> smartBugs;
@@ -144,6 +149,7 @@ int main(int argc, char* argv[])
     std::vector<SmallPlant> smallPlants;
     std::vector<Flower> flowers;
 
+    // Populate Life Vectors with initial state
     for (int y = 0; y < t.grid.y; ++y) {
         for (int x = 0; x < t.grid.x; ++x) {
             Vec2 pos(x, y);
@@ -194,35 +200,43 @@ int main(int argc, char* argv[])
         }
     }
 
+    // Include initial life in the total counters
     stats.totalDumbBugs = dumbBugs.size();
     stats.totalSmartBugs = smartBugs.size();
     stats.totalSmallPlants = smallPlants.size();
     stats.totalShrews = shrews.size();
     
+    // Declare cycle Variables
     clock_t cycleTime;
     float longestCycle = 0;
     int totalCycles = 0;
 
+    // Begin Sim Loop
     bool keepWinOpen = true;
     bool paused      = false;
     while (keepWinOpen) {
 
+        // Time at start of cycle
         cycleTime = clock();
 
-        // 'q' to quit
+        // q to quit
         int in = getch();
         if (in == 'q') {
             keepWinOpen = false;
         }
+        // space to pause
         else if (in == ' ') {
             paused = !paused;
         }
+        // r to reload color
         else if (in == 'r') {
             picasso.updateColors();
         }
+        // R to refresh map
         else if (in == 'R') {
             picasso.refresh(t.grid.map, t.grid.x, t.grid.y);
         }
+        // Shift+right to incrament frame duration by 5
         else if (in == KEY_SRIGHT)
         {
             if (msFrameSpeed > 95)
@@ -230,6 +244,7 @@ int main(int argc, char* argv[])
             else
                 msFrameSpeed += 5;
         }
+        // Shift+left to decrament frame duration by 5
         else if (in == KEY_SLEFT)
         {
             if (msFrameSpeed < 5)
@@ -237,6 +252,7 @@ int main(int argc, char* argv[])
             else
                 msFrameSpeed -= 5;
         }
+        // right to incrament frame duration by 0.5
         else if (in == KEY_RIGHT)
         {
             if (msFrameSpeed > 99.5)
@@ -244,6 +260,7 @@ int main(int argc, char* argv[])
             else
                 msFrameSpeed += 0.5;
         }
+        // left to decrament frame duration by 0.5
         else if (in == KEY_LEFT)
         {
             if (msFrameSpeed < 0.5)
@@ -252,6 +269,7 @@ int main(int argc, char* argv[])
                 msFrameSpeed -= 0.5;
         }
 
+        // minimal updates while paused
         if (paused)
         {
             stats.msFrameSpeed = msFrameSpeed;
@@ -267,7 +285,17 @@ int main(int argc, char* argv[])
 ==============================================================================*/
 
 //=== Action Loops =============================================================
+    
+    /**
+     *  Loops through each life array allowing each life form to
+     *  take an action.
+     *  
+     *  Mostly handles management of life arrays, such as births and
+     *  deaths. Also takes care of some things that would
+     *  be awkward to do from the action call as of right now.
+     */
 
+            // Common birth/death arrays usable by most life
             VecArr newBirths;
             IntArr newDeaths;
 
@@ -351,13 +379,16 @@ int main(int argc, char* argv[])
                 });
 
                 mergeDeaths(smallPlants, newDeaths);
-
+                
+                // Merge Plant Births
                 stats.totalSmallPlants += newPlants.size();
                 for (auto it = newPlants.begin(); it != newPlants.end(); ++it)
                 {
                     Vec2 birthPlace = it->first;
                     int birthColor;
-                    if (rand() % 150)
+                    
+                    // 1/200 chance of new plant being a different color than its parent
+                    if (rand() % 200)
                         birthColor = it->second;
                     else
                         birthColor = rand() % 4;
@@ -386,14 +417,18 @@ int main(int argc, char* argv[])
 
 //=== Cycle Speed Calculations =================================================
             
+            // Deals with cycle times
             float msCycleTime = (float)((clock() - cycleTime)/100);
             float msDelay = msFrameSpeed - msCycleTime;
 
+            // Delay drawing if cycle happened faster than msFrameSpeed
             if (msDelay > 0)
                 napms(msDelay);
 
+            // Picasso draws world changes to display
             picasso.draw(winOffX, winOffY);
 
+            // Deal with stats / counters
             if (totalCycles > 20 && longestCycle < msCycleTime)
                 longestCycle = msCycleTime;
 
@@ -421,6 +456,7 @@ int main(int argc, char* argv[])
             
             ++totalCycles;
 
+            // Tukey draws stat changes to display
             tukey.draw(stats, statOffX, statOffY);
         }
     }
