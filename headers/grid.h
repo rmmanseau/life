@@ -36,10 +36,7 @@ public:
     inline void addChar(Vec2 pos, char c)
     {
         map[pos.y * x + pos.x] = c;
-        
-        #if !SIMPLEMODE
-            informDrawer(c, pos);
-        #endif
+        informDrawer(c, pos);
     }
     inline void removeChar(Vec2 pos)
     {

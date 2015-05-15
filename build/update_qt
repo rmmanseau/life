@@ -5,6 +5,7 @@ rm *.cpp
 
 cp ~/CS/c++/life/src/* .
 cp ~/CS/c++/life/headers/* .
+cp ~/CS/c++/life/config/* .
 
 ls ~/CS/c++/life/src/ >> life.pro
 ls ~/CS/c++/life/headers/ >> life.pro

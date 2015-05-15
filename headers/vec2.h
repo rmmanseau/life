@@ -42,5 +42,23 @@ inline Vec2 operator *= (Vec2 &u, int s)
 
     return u;
 }
+inline bool operator < (const Vec2 &u, const Vec2 &v)
+{
+    if (u.x < v.x)
+        return true;
+    else if (u.x > v.x)
+        return false;
+    else
+    {
+        if (u.y < v.y)
+            return true;
+        else
+            return false;
+    }
+}
+inline bool operator == (const Vec2 &u, const Vec2 &v)
+{
+    return (u.x == v.x && u.y == v.y);
+}
 
 #endif // VEC2_H

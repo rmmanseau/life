@@ -9,8 +9,8 @@ namespace Color {
 
 void createStatColors()
 {
-    init_color(_NORM_BACK, 500, 500, 500);
-    init_color(_NORM_TEXT, 100, 100, 100);
+    init_color(_NORM_BACK, 0, 0, 0);
+    init_color(_NORM_TEXT, 900, 900, 900);
 
     init_pair(Color::norm, _NORM_TEXT, _NORM_BACK);
 }

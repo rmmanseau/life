@@ -5,8 +5,6 @@
 #include <vector>
 #include "vec2.h"
 
-#define SIMPLEMODE false
-
 enum Direction { 
     n,
     ne,
@@ -25,6 +23,8 @@ typedef std::multimap<char, Direction>  CharDirMap;
 typedef std::multimap<char, Vec2>       CharVecMap;
 typedef std::pair<char, Direction>      CharDirPair;
 typedef std::pair<char, Vec2>           CharVecPair;
+typedef std::map<Vec2, int>             VecIntMap;
+typedef std::pair<Vec2, int>            VecIntPair;
 typedef std::map<Direction, Vec2>       DirVecMap;
 
 enum Sym {

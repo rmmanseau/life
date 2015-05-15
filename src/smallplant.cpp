@@ -15,12 +15,23 @@ struct C
     static const int flowerChance = 100;
 };
 
-SmallPlant::SmallPlant(Terrarium& home, Vec2 pos)
+SmallPlant::SmallPlant(Terrarium& home, Vec2 pos, int color)
     : Liver(home, pos, C::energyInitBase, C::energyInitVar, Sym::smallPlant)
     , Spawner({Sym::empty}, C::energyAfterGrow)
+    , _color(color)
 {}
 
-void SmallPlant::act(int ID, VecArr& newPlants, VecArr& newFlowers, IntArr& newDeaths, const DirVecMap& directions)
+void SmallPlant::spawnPlant(const DirVecMap& dirs, Direction dir, VecIntMap& newBirths, int color)
+{
+    Vec2 spawnPos = _pos + dirs.at(dir);
+    if (_home->checkIfValid(spawnPos, _canSpawnOn))
+    {
+        newBirths.insert(VecIntPair(spawnPos, _color));
+        _energy = C::energyAfterGrow;
+    }
+}
+
+void SmallPlant::act(int ID, VecIntMap& newPlants, VecArr& newFlowers, IntArr& newDeaths, const DirVecMap& directions)
 {
     int surroundingSmallPlants = numberOfSurrounding(directions, {Sym::smallPlant});
     if (surroundingSmallPlants == C::neighborsToSkipAct)
@@ -49,6 +60,6 @@ void SmallPlant::act(int ID, VecArr& newPlants, VecArr& newFlowers, IntArr& newD
             if (!(rand() % C::flowerChance))
                 spawn(directions, newDir, newFlowers);
             else
-                spawn(directions, newDir, newPlants);
+                spawnPlant(directions, newDir, newPlants, _color);
     }
 }

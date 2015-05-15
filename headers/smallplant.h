@@ -13,11 +13,16 @@
 #include "feeler.h"
 #include "spawner.h"
 
-struct SmallPlant : public Liver, public Feeler, public Spawner
+class SmallPlant : public Liver, public Feeler, public Spawner
 {
-    SmallPlant(Terrarium& home, Vec2 pos);
+    int _color;
 
-    void act(int ID, VecArr& newPlants, VecArr& newFlowers, IntArr& newDeaths, const DirVecMap& directions);
+public:
+    SmallPlant(Terrarium& home, Vec2 pos, int color = 0);
+
+    void act(int ID, VecIntMap& newPlants, VecArr& newFlowers, IntArr& newDeaths, const DirVecMap& directions);
+
+    virtual void spawnPlant(const DirVecMap& dirs, Direction dir, VecIntMap& newBirths, int color);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos() { return _pos; }
@@ -25,6 +30,7 @@ struct SmallPlant : public Liver, public Feeler, public Spawner
 
     inline char sym() { return _sym; }
     inline int energy() { return _energy; }
+    inline int color() { return _color; }
 };
 
 #endif // SMALLPLANT_H

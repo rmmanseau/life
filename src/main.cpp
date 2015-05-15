@@ -7,8 +7,8 @@
 #include "../headers/enums.h"
 #include "../headers/vec2.h"
 #include "../headers/helpers.h"
-#include "../headers/worlds.h"
 #include "../headers/terrarium.h"
+#include "../headers/imports.h"
 #include "../headers/worlddrawer.h"
 #include "../headers/statdrawer.h"
 #include "../headers/dumbbug.h"
@@ -16,10 +16,9 @@
 #include "../headers/shrew.h"
 #include "../headers/smallplant.h"
 #include "../headers/flower.h"
-
+// SIMPLEMODE
 ///=== Settings ================================================================
-float msFrameSpeed = 0.1;
-std::string map = World::test;
+float msFrameSpeed = 15;
 
 int winOffX = 4;
 int winOffY = 2;
@@ -55,46 +54,51 @@ int mergeBirths(Terrarium& t, std::vector<T>& living, VecArr& newBirths)
     return newBirthAmount;
 }
 
+void printWorldNames(StrStrMap& worlds)
+{
+    std::cout << "Available worlds include:\n";
+
+    for (auto it = worlds.begin(); it != worlds.end(); ++it)
+    {
+        std::cout << "  " << it->first << '\n';
+    }
+}
+
 int main(int argc, char* argv[])
 {
-    // World Argument Handler
-    if (argc > 1)
-    {
-        std::string mapName;
-        std::stringstream convert2(argv[1]);
-        convert2 >> mapName;
 
-        if (mapName == "valley")
-            map = World::valley;
-        else if (mapName == "dumbValley")
-            map = World::dumbValley;
-        else if (mapName == "middleRock")
-            map = World::middleRock;
-        else if (mapName == "dumbMiddleRock")
-            map = World::dumbMiddleRock;
-        else if (mapName == "smartMiddleRock")
-            map = World::smartMiddleRock;
-        else if (mapName == "seed")
-            map = World::seed;
-        else if (mapName == "test")
-            map = World::test;
-        else if (mapName == "test1")
-            map = World::test1;
-        else if (mapName == "seedBig")
-            map = World::seedBig;
-        else if (mapName == "big")
-            map = World::big;
-        else if (mapName == "dumbBig")
-            map = World::dumbBig;
-        else if (mapName == "smartBig")
-            map = World::smartBig;
-        
-        // Speed Argument Handler
-        if (argc > 2)
-        {
-            std::stringstream convert1(argv[2]);
-            convert1 >> msFrameSpeed;
-        }
+    StrStrMap worlds;
+    importMaps(worlds);
+
+    if (argc == 1)
+    {
+        std::cout << "Can not start without a world!\n";
+        printWorldNames(worlds);
+
+        exit(1);
+    }
+
+    // World Selection
+
+    std::string worldName;
+    std::stringstream convert2(argv[1]);
+    convert2 >> worldName;
+
+    if (worlds.count(worldName) == 0)
+    {
+        std::cout << "No such world!\n";
+        printWorldNames(worlds);
+
+        exit(1);
+    }
+
+    std::string world = worlds.at(worldName);
+    
+    // Speed Selection (Optional)
+    if (argc > 2)
+    {
+        std::stringstream convert1(argv[2]);
+        convert1 >> msFrameSpeed;
     }
 
     srand(time(0));
@@ -111,7 +115,7 @@ int main(int argc, char* argv[])
     directions[nw] = Vec2(-1, -1);
 
     // Create Terrarium
-    Terrarium t(map);
+    Terrarium t(world);
 
     // ncurses stuff
     initscr();
@@ -120,26 +124,16 @@ int main(int argc, char* argv[])
     noecho();
     timeout(0);
     curs_set(0);
+    start_color();
 
-    /**
-     * Simplemode does not include:
-     *  - color
-     *  - stats
-     *  - world drawer
-     */
-    #if !SIMPLEMODE
-        start_color();
-        WorldDrawer picasso(map, t.grid.x, t.grid.y);
-        t.grid.assignDrawer(picasso);
-        picasso.draw(winOffX, winOffY);
+    WorldDrawer picasso(t.grid.map, t.grid.x, t.grid.y);
+    t.grid.assignDrawer(picasso);
+    picasso.draw(winOffX, winOffY);
 
-        StatDrawer tukey;
-        Stats stats;
-        statOffX += winOffX + t.grid.x;
-        statOffY += winOffY;
-
-        bool colorUpdated = false;
-    #endif
+    StatDrawer tukey;
+    Stats stats;
+    statOffX += winOffX + t.grid.x;
+    statOffY += winOffY;
 
     std::vector<DumbBug> dumbBugs;
     std::vector<DumbBugEgg> dumbBugEggs;
@@ -200,12 +194,10 @@ int main(int argc, char* argv[])
         }
     }
 
-#if !SIMPLEMODE
     stats.totalDumbBugs = dumbBugs.size();
     stats.totalSmartBugs = smartBugs.size();
     stats.totalSmallPlants = smallPlants.size();
     stats.totalShrews = shrews.size();
-#endif
     
     clock_t cycleTime;
     float longestCycle = 0;
@@ -218,13 +210,18 @@ int main(int argc, char* argv[])
         cycleTime = clock();
 
         // 'q' to quit
-        // mvprintw(t.grid.y + 5, 0, "WE IN");
         int in = getch();
         if (in == 'q') {
             keepWinOpen = false;
         }
         else if (in == ' ') {
             paused = !paused;
+        }
+        else if (in == 'r') {
+            picasso.updateColors();
+        }
+        else if (in == 'R') {
+            picasso.refresh(t.grid.map, t.grid.x, t.grid.y);
         }
         else if (in == KEY_SRIGHT)
         {
@@ -257,21 +254,20 @@ int main(int argc, char* argv[])
 
         if (paused)
         {
-            colorUpdated = false;
+            stats.msFrameSpeed = msFrameSpeed;
+            picasso.draw(winOffX, winOffY);
+            tukey.draw(stats, statOffX, statOffY);
             napms(100);
         }
         else
         {
-            if (!colorUpdated) {   
-                picasso.updateColors();
-                colorUpdated = true;
-            }
 
 /*==============================================================================            
                 SIM LOOP
 ==============================================================================*/
 
-            // Action Loops
+//=== Action Loops =============================================================
+
             VecArr newBirths;
             IntArr newDeaths;
 
@@ -294,10 +290,8 @@ int main(int argc, char* argv[])
                 });
 
                 mergeDeaths(dumbBugEggs, newDeaths);
-#if !SIMPLEMODE
                 stats.totalDumbBugs +=
-#endif  
-                mergeBirths(t, dumbBugs, newBirths);
+                    mergeBirths(t, dumbBugs, newBirths);
             }
 
             // Smart Bug
@@ -319,10 +313,8 @@ int main(int argc, char* argv[])
                 });
 
                 mergeDeaths(smartBugEggs, newDeaths);
-#if !SIMPLEMODE
                 stats.totalSmartBugs +=
-#endif
-                mergeBirths(t, smartBugs, newBirths);
+                    mergeBirths(t, smartBugs, newBirths);
             }
             
             // Shrew
@@ -344,36 +336,61 @@ int main(int argc, char* argv[])
                 });
 
                 mergeDeaths(babyShrews, newDeaths);
-#if !SIMPLEMODE
                 stats.totalShrews +=
-#endif
-                mergeBirths(t, shrews, newBirths);
+                    mergeBirths(t, shrews, newBirths);
             }
 
             // Small Plant
             if (smallPlants.size())
             {
-                VecArr newFlowers;
+                VecIntMap newPlants;
+                VecArr    newFlowers;
 
                 forEach(smallPlants, [&](SmallPlant& l, int id){
-                    l.act(id, newBirths, newFlowers, newDeaths, directions);
+                    l.act(id, newPlants, newFlowers, newDeaths, directions);
                 });
 
                 mergeDeaths(smallPlants, newDeaths);
-#if !SIMPLEMODE
-                stats.totalSmallPlants +=
-#endif
-                mergeBirths(t, smallPlants, newBirths);
+
+                stats.totalSmallPlants += newPlants.size();
+                for (auto it = newPlants.begin(); it != newPlants.end(); ++it)
+                {
+                    Vec2 birthPlace = it->first;
+                    int birthColor;
+                    if (rand() % 150)
+                        birthColor = it->second;
+                    else
+                        birthColor = rand() % 4;
+
+                    SmallPlant newBorn(t, birthPlace, birthColor);
+                    
+                    t.grid.addChar(birthPlace, newBorn.sym());
+                    picasso.recordColor(birthPlace, newBorn.color());
+                    
+                    smallPlants.push_back(newBorn);
+                }
+                newPlants.clear();
+
                 mergeBirths(t, flowers, newFlowers);
             }
+
+            // Flower
+            if (flowers.size())
+            {
+                forEach(flowers, [&](Flower& l, int id){
+                    l.act(id, newDeaths, directions);
+                });
+
+                mergeDeaths(flowers, newDeaths);
+            }
+
+//=== Cycle Speed Calculations =================================================
             
             float msCycleTime = (float)((clock() - cycleTime)/100);
             float msDelay = msFrameSpeed - msCycleTime;
 
             if (msDelay > 0)
                 napms(msDelay);
-
-#if !SIMPLEMODE
 
             picasso.draw(winOffX, winOffY);
 
@@ -405,9 +422,6 @@ int main(int argc, char* argv[])
             ++totalCycles;
 
             tukey.draw(stats, statOffX, statOffY);
-#else
-            mvprintw(0, 0, "%s", t.grid.map.c_str());
-#endif
         }
     }
     refresh();

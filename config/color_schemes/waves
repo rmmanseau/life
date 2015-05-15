@@ -1,0 +1,20 @@
+   COLOR           ID    R   G   B
+  ----------------------------------
+  Dirt:            100   60  45  0
+  Light Rock:      101   35  30  25
+  Middle Rock:     102   20  15  10
+  Dark Rock:       103   10  5   0
+  Dumb Bug:        104   60  45  0
+  Grass1:          105   60  120 200
+  Grass2:          106   40  90  180
+  Grass3:          107   50  110 190
+  Grass4:          108   60  160 220
+  Red Flower:      109   200 200 230
+  Yellow Flower:   110   190 190 250
+  Violet Flower:   111   245 245 245
+  Egg:             112   60  45  0
+  M Smart Bug:     113   140 204 238
+  F Smart Bug:     114   140 237 237
+  M Shrew:         115   171 141 119
+  F Shrew:         116   177 160 148
+  Baby Shrew:      117   181 163 148

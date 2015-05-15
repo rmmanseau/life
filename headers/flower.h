@@ -2,12 +2,13 @@
 #define FLOWER_H
 
 #include "liver.h"
+#include "feeler.h"
 
-struct Flower : public Liver
+struct Flower : public Liver , public Feeler
 {
     Flower(Terrarium& home, Vec2 pos);
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions);
+    void act(int ID, IntArr& newDeaths, const DirVecMap& directions);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos() { return _pos; }
