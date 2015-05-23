@@ -55,7 +55,7 @@ void DumbBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap&
     // Move
     else
     {
-        if (!(rand() % C::Bug::sluggishness)) 
+        if (!(rand() % C::Bug::sluggishness) && !surroundingsContain(directions, {Sym::flower})) 
         {
             Direction walkDir = randomDirection();
             move(directions, walkDir);

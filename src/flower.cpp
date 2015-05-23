@@ -6,7 +6,7 @@ Flower::Flower(Terrarium& home, Vec2 pos)
 
 void Flower::act(int ID, IntArr& newDeaths, const DirVecMap& directions)
 {
-    if (wasKilled())
+    if (wasKilled() || numberOfSurrounding(directions, {Sym::dumbBug, Sym::flower, Sym::rock}) > 4)
     {
         die(ID, newDeaths);
     }

@@ -12,7 +12,7 @@ struct C
     static const int neighborsToBlockGrow = 4;
     static const int neighborsToSkipAct = 7;
 
-    static const int flowerChance = 100;
+    static const int flowerChance = 200;
 };
 
 SmallPlant::SmallPlant(Terrarium& home, Vec2 pos, int color)
@@ -33,7 +33,7 @@ void SmallPlant::spawnPlant(const DirVecMap& dirs, Direction dir, VecIntMap& new
 
 void SmallPlant::act(int ID, VecIntMap& newPlants, VecArr& newFlowers, IntArr& newDeaths, const DirVecMap& directions)
 {
-    int surroundingSmallPlants = numberOfSurrounding(directions, {Sym::smallPlant});
+    int surroundingSmallPlants = numberOfSurrounding(directions, {Sym::smallPlant, Sym::flower});
     if (surroundingSmallPlants == C::neighborsToSkipAct)
         return;
 
@@ -57,7 +57,7 @@ void SmallPlant::act(int ID, VecIntMap& newPlants, VecArr& newFlowers, IntArr& n
         Direction newDir = randomDirection();
         Vec2 newPos = _pos + directions.at(newDir);
         if (numberOfSurrounding(newPos, directions, {Sym::smallPlant}) <= C::neighborsToBlockGrow)
-            if (!(rand() % C::flowerChance))
+            if (!(rand() % C::flowerChance) && !surroundingsContain(directions, {Sym::dumbBug}))
                 spawn(directions, newDir, newFlowers);
             else
                 spawnPlant(directions, newDir, newPlants, _color);
