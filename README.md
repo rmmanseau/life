@@ -1,28 +1,18 @@
 LIFE
 ====
 
-### Console based, Ascii Life.
+### Living in The CPU
 
-The last project got a little messy and I figured it could benefit from a ground up rework.
-I will go in hopefully making better decisions and overall improving to simplicity and
-extendability of the project
+Purely an educational project.
+
+Little bugs going about the electronic based life.
 
 ### Old Description
 
-This is a pretty small project I've been working on.
-Using ncurses and c++, I have created ascii life.
+Project is using the ncurses library to print to the console with color and what not.
+http://www.gnu.org/software/ncurses/
 
-This project is heavily inspired by the digital life project from the *Eloquent Javascript*
-textbook. I did not reference his javascript implementation very much, but the idea very much
+The idea for this program came from the digital life project in the *Eloquent Javascript*
+textbook. All the code here is mine, and I made some significant additions, but the idea very much
 belongs to EJ's author.
 http://eloquentjavascript.net/
-
-The goal of this project is, primarily, to learn c++ and it has been very helpful in doing that.
-However, I also just find it really entertaining to watch the tiny Ascii creatures go about
-their lives.
-
-Unlike the code in Fyz, I am to some extent proud of this code, and if anybody see's anything
-that they feel could be improved somehow, please let me know. I want nothing more than to
-continue learning from this project.
-
-To anyone that ends up reading this, have a nice day.
