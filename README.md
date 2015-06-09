@@ -5,11 +5,9 @@ LIFE
 
 Purely an educational project.
 
-Little bugs going about the electronic based life.
+Little bugs going about their electronic based life.
 
-### Old Description
-
-Project is using the ncurses library to print to the console with color and what not.
+The project is using the ncurses library to print to the console with color and what not.
 http://www.gnu.org/software/ncurses/
 
 The idea for this program came from the digital life project in the *Eloquent Javascript*
