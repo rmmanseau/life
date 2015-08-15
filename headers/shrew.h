@@ -20,6 +20,9 @@ private:
     int _directionChance;
     bool _spinning;
     int _spinningClockwise;
+    int _preyCount;
+    bool _justWalked;
+    int _lifespan;
 
 public:
     Shrew(Terrarium& home, Vec2 pos, char sym = '#');

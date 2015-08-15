@@ -4,13 +4,13 @@ struct C
 {
     struct Adlt
     {
-        static const int energyInitBase   = 600; //600
-        static const int energyInitVar    = 100; //100
-        static const int energyFull       = 1000; //800
-        static const int energyHunting    = 1100;
-        static const int energyFromEating = 200; //200
-        static const int energyToSpawn    = 700; //700
-        static const int energyAfterSpawn = 500; //300
+        static const int energyInitBase   = 1000; //600
+        static const int energyInitVar    = 200; //100
+        static const int energyFull       = 1400; //800
+        static const int energyHunting    = 600;
+        static const int energyFromEating = 700; //200
+        static const int energyToSpawn    = 1250; //700
+        static const int energyAfterSpawn = 700; //300
 
         static const int whimsyInit          = 100; //100
         static const int whimsyFromEating    = 50;  //50
@@ -21,6 +21,10 @@ struct C
         static const int sightDistance   = 15; //15  
         static const int directionChance = 15; //15  // 1/x chance
         static const int spinChance      = 20; //20
+
+        static const int seenEnoughPrey = 6; //6
+
+        static const int lifespanBase = 3000; //5000
     };
 
     struct Baby
@@ -44,6 +48,9 @@ Shrew::Shrew(Terrarium& home, Vec2 pos, char sym)
     , _directionChance(C::Adlt::directionChance)
     , _spinning(false)
     , _spinningClockwise(true)
+    , _preyCount(0)
+    , _justWalked(false)
+    , _lifespan(C::Adlt::lifespanBase)
 {
     if (_sym == '#')
     {
@@ -55,6 +62,7 @@ Shrew::Shrew(Terrarium& home, Vec2 pos, char sym)
 void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
 {
     --_energy;
+    --_lifespan;
 
     if (_energy < C::Adlt::whimsyThreshold)
         _whimsy -= C::Adlt::whimsyDrain;
@@ -71,18 +79,20 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
     }
 
     // Die
-    if (_energy < 0 || wasKilled())
+    if (_energy < 0 || _lifespan < 0 || wasKilled())
     {
         die(ID, newDeaths);
     }
     // Eat
-    else if (_energy < C::Adlt::energyFull
+    else if (_preyCount > C::Adlt::seenEnoughPrey
+             && _energy < C::Adlt::energyFull
              && surroundingsContain(directions, _canEat))
     {
         feelSurroundings(directions);
         Direction foodDir = randomElementOfIndex(_canEat, _feelable);
         eat(directions, foodDir);
         _whimsy += C::Adlt::whimsyFromEating;
+        _preyCount = 0;
     }
     // Spawn
     else if (_sym == Sym::fShrew
@@ -93,6 +103,7 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
         Direction mateDir = randomElementOfIndex(_canSpawnOn, _feelable);
         spawn(directions, mateDir, newBirths);
         _whimsy += C::Adlt::whimsyFromSpawning;
+        _preyCount = 0;
     }
     // View Surroundings
     else
@@ -106,6 +117,7 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
         {
             _currentDir = randomElementOfIndex(_canEat, _seeable);
             move(directions, _currentDir);
+            ++_preyCount;
         }
         // Walk To Mate
         else if (_sym == Sym::mShrew
@@ -140,7 +152,9 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
         // Move
         else
         {
-            move(directions, _currentDir);
+            // if (_justWalked)
+                move(directions, _currentDir);
+            _justWalked = !_justWalked;
         }
     }
 }
