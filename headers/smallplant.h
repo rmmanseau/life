@@ -17,6 +17,8 @@ class SmallPlant : public Liver, public Feeler, public Spawner
 {
     int _color;
 
+    LifePtr spawn(const Directions dirs, Direction dir);
+
 public:
     SmallPlant(Terrarium& home, Vec2 pos, int color = 0);
 

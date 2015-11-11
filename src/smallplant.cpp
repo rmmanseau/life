@@ -50,7 +50,7 @@ void SmallPlant::act(int ID, VecIntMap& newPlants, VecArr& newFlowers, IntArr& n
 
     if (_energy <= 0 || wasKilled())
     {
-        die(ID, newDeaths);
+        die();
     }
     else if (_energy >= C::energyToGrow)
     {

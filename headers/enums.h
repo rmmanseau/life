@@ -3,6 +3,9 @@
 
 #include <map>
 #include <vector>
+#include <memory>
+
+#include "liver.h"
 #include "vec2.h"
 
 enum Direction { 
@@ -26,6 +29,9 @@ typedef std::pair<char, Vec2>           CharVecPair;
 typedef std::map<Vec2, int>             VecIntMap;
 typedef std::pair<Vec2, int>            VecIntPair;
 typedef std::map<Direction, Vec2>       DirVecMap;
+
+typedef std::unique_ptr<Liver>          LifePtr;
+typedef std::vector<LifePtr>            LifeArr;
 
 enum Sym {
     rock        = '@',

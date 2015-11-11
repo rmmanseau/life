@@ -38,14 +38,18 @@ SmartBug::SmartBug(Terrarium& home, Vec2 pos, char sym)
     _currentDir = randomDirection();
 }
 
-void SmartBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
+LifePtr spawn(const DirVecMap& dirs, Direction dir) {
+    return LifePtr(new SmartBugEgg(*_home, _pos + dirs.at(dir)));
+}
+
+void SmartBug::act(LifeArr& newBirths, const DirVecMap& directions)
 {
     --_energy;
     
     // Die
     if (_energy <= 0 || wasKilled())
     {
-        die(ID, newDeaths);
+        die();
     }
     // Eat
     else if (_energy <= C::Bug::energyFull
@@ -62,7 +66,7 @@ void SmartBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap
     {
         feelSurroundings(directions);
         Direction mateDir = randomElementOfIndex(_canSpawnOn, _feelable);
-        spawn(directions, mateDir, newBirths);
+        newBirths.push_back(spawn(directions, mateDir))
     }
     // View Surroundings
     else
@@ -105,18 +109,22 @@ SmartBugEgg::SmartBugEgg(Terrarium& home, Vec2 pos)
     , Spawner({Sym::smartBugEgg}, C::Egg::energyAfterSpawn)
 {}
 
-void SmartBugEgg::act(int ID, VecArr& newBirths, IntArr& newDeaths)
+LifePtr spawn() {
+    return LifePtr(new SmartBug(*_home, _pos));
+}
+
+void SmartBugEgg::act(LifeArr& newBirths, const DirVecMap& directions)
 {
     ++_energy;
 
     // Die
     if (_energy <= 0 || wasKilled())
     {
-        die(ID, newDeaths);
+        die();
     }
     else if (_energy >= C::Egg::energyToHatch)
     {
-        spawn(newBirths);
-        die(ID, newDeaths);
+        newBirths.push_back(spawn());
+        die();
     }
 }

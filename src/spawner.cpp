@@ -5,6 +5,10 @@ Spawner::Spawner(CharArr canSpawnOn, int energyAfterSpawn)
     , _canSpawnOn(canSpawnOn)
 {}
 
+bool Spawner::canSpawn(const DirVecMap& dirs, Direction dir) {
+    
+}
+
 void Spawner::spawn(const DirVecMap& dirs, Direction dir, VecArr& newBirths)
 {
     Vec2 spawnPos = pos() + dirs.at(dir);

@@ -15,11 +15,14 @@
 #include "eater.h"
 #include "spawner.h"
 
-struct DumbBug : public Liver, public Mover, public Feeler, public Eater, public Spawner
+class DumbBug : public Liver, public Mover, public Feeler, public Eater, public Spawner
 {
+    LifePtr spawn(const DirVecMap& dirs, Direction dir);
+
+public:
     DumbBug(Terrarium& home, Vec2 pos);
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions);
+    void act(LifeArr& newBirths, const DirVecMap& directions);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos()            { return _pos; }
@@ -31,11 +34,14 @@ struct DumbBug : public Liver, public Mover, public Feeler, public Eater, public
 
 
 
-struct DumbBugEgg : public Liver, public Spawner
+class DumbBugEgg : public Liver, public Spawner
 {
+    LifePtr spawn();
+
+public:
     DumbBugEgg(Terrarium& home, Vec2 pos);
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths);
+    void act(LifeArr& newBirths, const DirVecMap& directions);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos() { return _pos; }

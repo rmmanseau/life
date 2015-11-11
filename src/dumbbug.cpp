@@ -30,20 +30,24 @@ DumbBug::DumbBug(Terrarium& home, Vec2 pos)
     , Spawner({Sym::empty}, C::Bug::energyAfterSpawn)
 {}
 
-void DumbBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
+LifePtr spawn(const DirVecMap& dirs, Direction dir) {
+    return LifePtr(new DumbBugEgg(*_home, _pos + dirs.at(dir)));
+}
+
+void DumbBug::act(LifeArr& newBirths, const DirVecMap& directions)
 {
     --_energy;
     
     // Die
     if (_energy <= 0 || wasKilled())
     {
-        die(ID, newDeaths);
+        die();
     }
     // Spawn
     else if (_energy >= C::Bug::energyToSpawn)
     {
         Direction spawnDir = randomElementOfIndex(_canSpawnOn, _feelable);
-        spawn(directions, spawnDir, newBirths);
+        newBirths.push_back(spawn(directions, spawnDir));
     }
     // Eat
     else if (surroundingsContain(directions, _canEat) && _energy <= C::Bug::energyFull)
@@ -64,24 +68,29 @@ void DumbBug::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap&
 }
 
 
+
 DumbBugEgg::DumbBugEgg(Terrarium& home, Vec2 pos)
     : Liver(home, pos, C::Egg::energyInitBase, C::Egg::energyInitVar, Sym::dumbBugEgg)
     , Spawner({Sym::dumbBugEgg}, C::Egg::energyAfterSpawn)
 {}
 
-void DumbBugEgg::act(int ID, VecArr& newBirths, IntArr& newDeaths)
+LifePtr spawn() {
+    return LifePtr(new DumbBug(*_home, _pos));
+}
+
+void DumbBugEgg::act(LifePtr& newBirths, const DirVecMap& directions)
 {
     ++_energy;
 
     // Die
     if (_energy <= 0 || wasKilled())
     {
-        die(ID, newDeaths);
+        die();
     }
     else if (_energy >= C::Egg::energyToHatch)
     {
-        spawn(newBirths);
-        die(ID, newDeaths);
+        newBirths.push_back(spawn());
+        die();
     }
 
 }

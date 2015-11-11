@@ -14,7 +14,6 @@
 
 class Shrew : public Liver, public Mover, public Seer, public Eater, public Spawner
 {
-private:
     Direction _currentDir;
     int _whimsy;
     int _directionChance;
@@ -24,10 +23,12 @@ private:
     bool _justWalked;
     int _lifespan;
 
+    LifePtr spawn(const Directions dirs, Direction dir);
+
 public:
     Shrew(Terrarium& home, Vec2 pos, char sym = '#');
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions);
+    void act(LifeArr& newBirths, const DirVecMap& directions);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos()            { return _pos; }
@@ -39,14 +40,15 @@ public:
 
 class BabyShrew : public Liver, public Mover, public Spawner
 {
-private:
     Direction _currentDir;
     int _spinningClockwise;
+
+    LifePtr spawn();
 
 public:
     BabyShrew(Terrarium& home, Vec2 pos);
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions);
+    void act(LifeArr& newBirths, const DirVecMap& directions);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos()            { return _pos; }

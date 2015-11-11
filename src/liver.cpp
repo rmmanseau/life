@@ -4,6 +4,7 @@ Liver::Liver(Terrarium& home, Vec2 pos, int energyBase, int energyVar, char sym)
     : _home(&home)
     , _pos(pos)
     , _sym(sym)
+    , _alive(true)
 {
     _energy = energyBase;
     if (energyVar > 0) {
@@ -11,10 +12,14 @@ Liver::Liver(Terrarium& home, Vec2 pos, int energyBase, int energyVar, char sym)
     }
 }
 
-void Liver::die(int ID, IntArr& deaths)
+void Liver::die()
 {
     home()->grid.removeChar(pos());
-    deaths.push_back(ID);
+    _alive = false;
+}
+
+bool Liver::dead() {
+    return !_alive;
 }
 
 bool Liver::wasKilled()

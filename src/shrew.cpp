@@ -59,7 +59,11 @@ Shrew::Shrew(Terrarium& home, Vec2 pos, char sym)
     _currentDir = randomDirection();
 }
 
-void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
+LifePtr spawn(const Directions dirs, Direction dir) {
+    return LifePtr(*_home, _pos + dirs.at(dir));
+}
+
+void Shrew::act(LifeArr& newBirths, const DirVecMap& directions)
 {
     --_energy;
     --_lifespan;
@@ -81,7 +85,7 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
     // Die
     if (_energy < 0 || _lifespan < 0 || wasKilled())
     {
-        die(ID, newDeaths);
+        die();
     }
     // Eat
     else if (_preyCount > C::Adlt::seenEnoughPrey
@@ -101,7 +105,7 @@ void Shrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& d
     {
         feelSurroundings(directions);
         Direction mateDir = randomElementOfIndex(_canSpawnOn, _feelable);
-        spawn(directions, mateDir, newBirths);
+        newBirths.push_back(spawn(directions, mateDir));
         _whimsy += C::Adlt::whimsyFromSpawning;
         _preyCount = 0;
     }
@@ -168,17 +172,21 @@ BabyShrew::BabyShrew(Terrarium& home, Vec2 pos)
     _currentDir = randomDirection();   
 }
 
-void BabyShrew::act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions)
+LifePtr spawn() {
+    return LifePtr(*_home, _pos);
+}
+
+void BabyShrew::act(LifeArr& newBirths, const DirVecMap& directions)
 {
     ++_energy;
 
     if (_energy < 0 || wasKilled())
     {
-        die(ID, newDeaths);
+        die();
     }
     else if (_energy > C::Baby::energyToSpawn)
     {
-        spawn(newBirths);
+        newBirths.push_back(spawn(newBirths));
     }
     else
     {

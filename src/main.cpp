@@ -3,6 +3,7 @@
 #include <ncurses.h>
 #include <time.h>
 #include <sstream>
+#include <memory>
 
 #include "../headers/enums.h"
 #include "../headers/vec2.h"
@@ -139,15 +140,17 @@ int main(int argc, char* argv[])
     statOffX += winOffX + t.grid.x;
     statOffY += winOffY;
 
-    // Life Vectors
-    std::vector<DumbBug> dumbBugs;
-    std::vector<DumbBugEgg> dumbBugEggs;
-    std::vector<SmartBug> smartBugs;
-    std::vector<SmartBugEgg> smartBugEggs;
-    std::vector<Shrew> shrews;
-    std::vector<BabyShrew> babyShrews;
-    std::vector<SmallPlant> smallPlants;
-    std::vector<Flower> flowers;
+    // Life Vector
+    LifeArr life;
+
+    // std::vector<DumbBug> dumbBugs;
+    // std::vector<DumbBugEgg> dumbBugEggs;
+    // std::vector<SmartBug> smartBugs;
+    // std::vector<SmartBugEgg> smartBugEggs;
+    // std::vector<Shrew> shrews;
+    // std::vector<BabyShrew> babyShrews;
+    // std::vector<SmallPlant> smallPlants;
+    // std::vector<Flower> flowers;
 
     // Populate Life Vectors with initial state
     for (int y = 0; y < t.grid.y; ++y) {
@@ -158,53 +161,53 @@ int main(int argc, char* argv[])
             switch (sym)
             {
                 case Sym::dumbBug:
-                    dumbBugs.push_back(DumbBug(t, pos));
+                    life.push_back(std::unique_ptr<Liver>(new DumbBug(t, pos)));
                     break;
 
                 case Sym::dumbBugEgg:
-                    dumbBugEggs.push_back(DumbBugEgg(t, pos));
+                    life.push_back(std::unique_ptr<Liver>(new DumbBugEgg(t, pos)));
                     break;
 
                 case Sym::mSmartBug:
-                    smartBugs.push_back(SmartBug(t, pos, Sym::mSmartBug));
+                    life.push_back(std::unique_ptr<Liver>(new SmartBug(t, pos, Sym::mSmartBug)));
                     break;
 
                 case Sym::fSmartBug:
-                    smartBugs.push_back(SmartBug(t, pos, Sym::fSmartBug));
+                    life.push_back(std::unique_ptr<Liver>(new SmartBug(t, pos, Sym::fSmartBug)));
                     break;
 
                 case Sym::smartBugEgg:
-                    smartBugEggs.push_back(SmartBugEgg(t, pos));
+                    life.push_back(std::unique_ptr<Liver>(new SmartBugEgg(t, pos)));
                     break;
 
                 case Sym::mShrew:
-                    shrews.push_back(Shrew(t, pos, Sym::mShrew));
+                    life.push_back(std::unique_ptr<Liver>(new Shrew(t, pos, Sym::mShrew)));
                     break;
 
                 case Sym::fShrew:
-                    shrews.push_back(Shrew(t, pos, Sym::fShrew));
+                    life.push_back(std::unique_ptr<Liver>(new Shrew(t, pos, Sym::fShrew)));
                     break;
 
                 case Sym::bShrew:
-                    babyShrews.push_back(BabyShrew(t, pos));
+                    life.push_back(std::unique_ptr<Liver>(new BabyShrew(t, pos)));
                     break;
 
                 case Sym::smallPlant:
-                    smallPlants.push_back(SmallPlant(t, pos));
+                    life.push_back(std::unique_ptr<Liver>(new SmallPlant(t, pos)));
                     break;
 
                 case Sym::flower:
-                    flowers.push_back(Flower(t, pos));
+                    life.push_back(std::unique_ptr<Liver>(new Flower(t, pos)));
                     break;
             }
         }
     }
 
     // Include initial life in the total counters
-    stats.totalDumbBugs = dumbBugs.size();
-    stats.totalSmartBugs = smartBugs.size();
-    stats.totalSmallPlants = smallPlants.size();
-    stats.totalShrews = shrews.size();
+    // stats.totalDumbBugs = dumbBugs.size();
+    // stats.totalSmartBugs = smartBugs.size();
+    // stats.totalSmallPlants = smallPlants.size();
+    // stats.totalShrews = shrews.size();
     
     // Declare cycle Variables
     clock_t cycleTime;
@@ -272,9 +275,9 @@ int main(int argc, char* argv[])
         // minimal updates while paused
         if (paused)
         {
-            stats.msFrameSpeed = msFrameSpeed;
+            // stats.msFrameSpeed = msFrameSpeed;
             picasso.draw(winOffX, winOffY);
-            tukey.draw(stats, statOffX, statOffY);
+            // tukey.draw(stats, statOffX, statOffY);
             napms(100);
         }
         else
@@ -296,168 +299,177 @@ int main(int argc, char* argv[])
      */
 
             // Common birth/death arrays usable by most life
-            VecArr newBirths;
-            IntArr newDeaths;
+//             std::vector<std::unique_ptr<Liver> > newBirths;
 
-            // Dumb Bug
-            if (dumbBugs.size())
-            {
-                forEach(dumbBugs, [&](DumbBug& l, int id){
-                    l.act(id, newBirths, newDeaths, directions);
-                });
+//             if (life.size())
+//             {
+//                 for (int i = life.size()-1; i >= 0; --i) {
+//                     life[i]->act(life, directions);
+                    
+//                     if (life[i]->dead())
+//                         life.erase(life.begin() + i);
+//                 }
+//             }
 
-                mergeDeaths(dumbBugs, newDeaths);
-                mergeBirths(t, dumbBugEggs, newBirths);
-            }
+//             // Dumb Bug
+//             if (dumbBugs.size())
+//             {
+//                 forEach(dumbBugs, [&](DumbBug& l, int id){
+//                     l.act(id, newBirths, newDeaths, directions);
+//                 });
 
-            // Dumb Bug Egg
-            if (dumbBugEggs.size())
-            {
-                forEach(dumbBugEggs, [&](DumbBugEgg& l, int id){
-                    l.act(id, newBirths, newDeaths);
-                });
+//                 mergeDeaths(dumbBugs, newDeaths);
+//                 mergeBirths(t, dumbBugEggs, newBirths);
+//             }
 
-                mergeDeaths(dumbBugEggs, newDeaths);
-                stats.totalDumbBugs +=
-                    mergeBirths(t, dumbBugs, newBirths);
-            }
+//             // Dumb Bug Egg
+//             if (dumbBugEggs.size())
+//             {
+//                 forEach(dumbBugEggs, [&](DumbBugEgg& l, int id){
+//                     l.act(id, newBirths, newDeaths);
+//                 });
 
-            // Smart Bug
-            if (smartBugs.size())
-            {
-                forEach(smartBugs, [&](SmartBug& l, int id){
-                    l.act(id, newBirths, newDeaths, directions);
-                });
+//                 mergeDeaths(dumbBugEggs, newDeaths);
+//                 stats.totalDumbBugs +=
+//                     mergeBirths(t, dumbBugs, newBirths);
+//             }
 
-                mergeDeaths(smartBugs, newDeaths);
-                mergeBirths(t, smartBugEggs, newBirths);
-            }
+//             // Smart Bug
+//             if (smartBugs.size())
+//             {
+//                 forEach(smartBugs, [&](SmartBug& l, int id){
+//                     l.act(id, newBirths, newDeaths, directions);
+//                 });
 
-            // Smart Bug Egg
-            if (smartBugEggs.size())
-            {
-                forEach(smartBugEggs, [&](SmartBugEgg& l, int id){
-                    l.act(id, newBirths, newDeaths);
-                });
+//                 mergeDeaths(smartBugs, newDeaths);
+//                 mergeBirths(t, smartBugEggs, newBirths);
+//             }
 
-                mergeDeaths(smartBugEggs, newDeaths);
-                stats.totalSmartBugs +=
-                    mergeBirths(t, smartBugs, newBirths);
-            }
+//             // Smart Bug Egg
+//             if (smartBugEggs.size())
+//             {
+//                 forEach(smartBugEggs, [&](SmartBugEgg& l, int id){
+//                     l.act(id, newBirths, newDeaths);
+//                 });
+
+//                 mergeDeaths(smartBugEggs, newDeaths);
+//                 stats.totalSmartBugs +=
+//                     mergeBirths(t, smartBugs, newBirths);
+//             }
             
-            // Shrew
-            if (shrews.size())
-            {
-                forEach(shrews, [&](Shrew& l, int id){
-                    l.act(id, newBirths, newDeaths, directions);
-                });
+//             // Shrew
+//             if (shrews.size())
+//             {
+//                 forEach(shrews, [&](Shrew& l, int id){
+//                     l.act(id, newBirths, newDeaths, directions);
+//                 });
 
-                mergeDeaths(shrews, newDeaths);
-                mergeBirths(t, babyShrews, newBirths);
-            }
+//                 mergeDeaths(shrews, newDeaths);
+//                 mergeBirths(t, babyShrews, newBirths);
+//             }
 
-            // Baby Shrew
-            if (babyShrews.size())
-            {
-                forEach(babyShrews, [&](BabyShrew& l, int id){
-                    l.act(id, newBirths, newDeaths, directions);
-                });
+//             // Baby Shrew
+//             if (babyShrews.size())
+//             {
+//                 forEach(babyShrews, [&](BabyShrew& l, int id){
+//                     l.act(id, newBirths, newDeaths, directions);
+//                 });
 
-                mergeDeaths(babyShrews, newDeaths);
-                stats.totalShrews +=
-                    mergeBirths(t, shrews, newBirths);
-            }
+//                 mergeDeaths(babyShrews, newDeaths);
+//                 stats.totalShrews +=
+//                     mergeBirths(t, shrews, newBirths);
+//             }
 
-            // Small Plant
-            if (smallPlants.size())
-            {
-                VecIntMap newPlants;
-                VecArr    newFlowers;
+//             // Small Plant
+//             if (smallPlants.size())
+//             {
+//                 VecIntMap newPlants;
+//                 VecArr    newFlowers;
 
-                forEach(smallPlants, [&](SmallPlant& l, int id){
-                    l.act(id, newPlants, newFlowers, newDeaths, directions);
-                });
+//                 forEach(smallPlants, [&](SmallPlant& l, int id){
+//                     l.act(id, newPlants, newFlowers, newDeaths, directions);
+//                 });
 
-                mergeDeaths(smallPlants, newDeaths);
+//                 mergeDeaths(smallPlants, newDeaths);
                 
-                // Merge Plant Births
-                stats.totalSmallPlants += newPlants.size();
-                for (auto it = newPlants.begin(); it != newPlants.end(); ++it)
-                {
-                    Vec2 birthPlace = it->first;
-                    int birthColor;
+//                 // Merge Plant Births
+//                 stats.totalSmallPlants += newPlants.size();
+//                 for (auto it = newPlants.begin(); it != newPlants.end(); ++it)
+//                 {
+//                     Vec2 birthPlace = it->first;
+//                     int birthColor;
                     
-                    // 1/200 chance of new plant being a different color than its parent
-                    if (rand() % 200)
-                        birthColor = it->second;
-                    else
-                        birthColor = rand() % 4;
+//                     // 1/200 chance of new plant being a different color than its parent
+//                     if (rand() % 200)
+//                         birthColor = it->second;
+//                     else
+//                         birthColor = rand() % 4;
 
-                    SmallPlant newBorn(t, birthPlace, birthColor);
+//                     SmallPlant newBorn(t, birthPlace, birthColor);
                     
-                    t.grid.addChar(birthPlace, newBorn.sym());
-                    picasso.recordColor(birthPlace, newBorn.color());
+//                     t.grid.addChar(birthPlace, newBorn.sym());
+//                     picasso.recordColor(birthPlace, newBorn.color());
                     
-                    smallPlants.push_back(newBorn);
-                }
-                newPlants.clear();
+//                     smallPlants.push_back(newBorn);
+//                 }
+//                 newPlants.clear();
 
-                mergeBirths(t, flowers, newFlowers);
-            }
+//                 mergeBirths(t, flowers, newFlowers);
+//             }
 
-            // Flower
-            if (flowers.size())
-            {
-                forEach(flowers, [&](Flower& l, int id){
-                    l.act(id, newDeaths, directions);
-                });
+//             // Flower
+//             if (flowers.size())
+//             {
+//                 forEach(flowers, [&](Flower& l, int id){
+//                     l.act(id, newDeaths, directions);
+//                 });
 
-                mergeDeaths(flowers, newDeaths);
-            }
+//                 mergeDeaths(flowers, newDeaths);
+//             }
 
-//=== Cycle Speed Calculations =================================================
+// //=== Cycle Speed Calculations =================================================
             
-            // Deals with cycle times
-            float msCycleTime = (float)((clock() - cycleTime)/100);
-            float msDelay = msFrameSpeed - msCycleTime;
+//             // Deals with cycle times
+//             float msCycleTime = (float)((clock() - cycleTime)/100);
+//             float msDelay = msFrameSpeed - msCycleTime;
 
-            // Delay drawing if cycle happened faster than msFrameSpeed
-            if (msDelay > 0)
-                napms(msDelay);
+//             // Delay drawing if cycle happened faster than msFrameSpeed
+//             if (msDelay > 0)
+//                 napms(msDelay);
 
-            // Picasso draws world changes to display
-            picasso.draw(winOffX, winOffY);
+//             // Picasso draws world changes to display
+//             picasso.draw(winOffX, winOffY);
 
             // Deal with stats / counters
-            if (totalCycles > 20 && longestCycle < msCycleTime)
-                longestCycle = msCycleTime;
+            // if (totalCycles > 20 && longestCycle < msCycleTime)
+            //     longestCycle = msCycleTime;
 
-            stats.msFrameSpeed = msFrameSpeed;
-            stats.msCycleSpeed = msCycleTime;
-            stats.msCycleDelay = msDelay;
-            stats.msLongestCycle = longestCycle;
+            // stats.msFrameSpeed = msFrameSpeed;
+            // stats.msCycleSpeed = msCycleTime;
+            // stats.msCycleDelay = msDelay;
+            // stats.msLongestCycle = longestCycle;
 
-            stats.totalCycles = totalCycles;
+            // stats.totalCycles = totalCycles;
 
-            stats.currentDumbBugs = dumbBugs.size();
-            stats.currentSmallPlants = smallPlants.size();
-            stats.currentSmartBugs = smartBugs.size();
-            stats.currentShrews = shrews.size();
+            // stats.currentDumbBugs = dumbBugs.size();
+            // stats.currentSmallPlants = smallPlants.size();
+            // stats.currentSmartBugs = smartBugs.size();
+            // stats.currentShrews = shrews.size();
 
-            stats.totalLife = stats.totalDumbBugs
-                              + stats.totalSmallPlants
-                              + stats.totalSmartBugs
-                              + stats.totalShrews;
+            // stats.totalLife = stats.totalDumbBugs
+            //                   + stats.totalSmallPlants
+            //                   + stats.totalSmartBugs
+            //                   + stats.totalShrews;
             
-            stats.currentLife = dumbBugs.size()
-                                + smartBugs.size()
-                                + smallPlants.size()
-                                + shrews.size();
+            // stats.currentLife = dumbBugs.size()
+            //                     + smartBugs.size()
+            //                     + smallPlants.size()
+            //                     + shrews.size();
             
-            ++totalCycles;
+            // ++totalCycles;
 
             // Tukey draws stat changes to display
-            tukey.draw(stats, statOffX, statOffY);
+            // tukey.draw(stats, statOffX, statOffY);
         }
     }
     refresh();

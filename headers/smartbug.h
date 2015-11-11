@@ -17,13 +17,14 @@
 
 class SmartBug : public Liver, public Mover, public Seer, public Eater, public Spawner
 {
-private:
     Direction _currentDir;
+
+    LifePtr spawn(const DirVecMap& dirs, Direction dir);
 
 public:
     SmartBug(Terrarium& home, Vec2 pos, char sym = '#');
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths, const DirVecMap& directions);
+    void act(LifeArr& newBirths, const DirVecMap& directions);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos()            { return _pos; }
@@ -33,11 +34,14 @@ public:
     inline virtual char sym() { return _sym; }
 };
 
-struct SmartBugEgg : public Liver, public Spawner
+class SmartBugEgg : public Liver, public Spawner
 {
+    LifePtr spawn();
+
+public:
     SmartBugEgg(Terrarium& home, Vec2 pos);
 
-    void act(int ID, VecArr& newBirths, IntArr& newDeaths);
+    void act(LifeArr& newBirths, const DirVecMap& directions);
 
     inline virtual Terrarium* home() { return _home; }
     inline virtual Vec2 pos() { return _pos; }
